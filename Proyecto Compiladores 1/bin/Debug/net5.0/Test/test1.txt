@@ -1,0 +1,18 @@
+﻿using Proyecto.Lexer;
+using System;
+using System.IO;
+
+namespace Proyecto_Compiladores_1
+{
+    public class main
+    {
+        static void Main(string[] args)
+        {
+            ^#
+            var entrada = new Entrada(code);
+            var escaner = new Escaner(entrada);
+            escaner.proximoToken();
+
+        }
+    }
+}
