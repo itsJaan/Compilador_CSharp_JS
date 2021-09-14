@@ -57,6 +57,21 @@ namespace Proyecto.Lexer.TokenizadorC.PalabrasReservadas
                         token = t
                     };
                 }
+                else if (tokCompleto.Equals("in", StringComparison.OrdinalIgnoreCase))
+                {
+                    var t = new Token
+                    {
+                        Lexema = tokCompleto,
+                        fila = e.posicion.linea,
+                        columna = (e.posicion.columna - cont),
+                        tipoToken = TipoToken.pIn
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
                 else
                 {
                     var t = new Token

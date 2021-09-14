@@ -1,7 +1,5 @@
 ﻿using Proyecto.Lexer.Tokens;
 using System;
-using System.Text;
-using System.Text.RegularExpressions;
 using Proyecto.Lexer.TokenizadorC;
 using Proyecto.Lexer.TokenizadorC.Singos;
 using Proyecto.Lexer.TokenizadorC.PalabrasReservadas;
@@ -39,7 +37,6 @@ namespace Proyecto.Lexer
                     new ComaToken(),
                     new ComillaToken(),
                     new NumeroToken(),
-                    new APalabraToken(),
                     new BPalabraToken(),
                     new CPalabraToken(),
                     new DPalabraToken(),
@@ -57,37 +54,36 @@ namespace Proyecto.Lexer
                     new VPalabraToken(),
                     new WPalabraToken(),
                     new IdentificadorToken(),
-                    new OperacionAritmeticaToken(),
                     new ExtrasToken()
                 };
-            
             while (true)
             {
+
                 var actual = siguienteChar();
-                if (actual == '\0')
+                if ( actual == '\0')
                 {
-                    return null;
-                } 
-                    
- 
-               ResultadoTokenizador t = new ResultadoTokenizador();
-               foreach (var i in arr)
-               {
+                    break;
+                }
+                ResultadoTokenizador t = new ResultadoTokenizador();
+                foreach (var i in arr)
+                {
                     t = i.verificarToken(entrada, actual.ToString());
                     Console.ForegroundColor = ConsoleColor.White;
                     if (t != null)
                     {
-                        if (t.token.tipoToken!= TipoToken.espacio && t.token.tipoToken != TipoToken.finLinea)
+                        if (t.token.tipoToken != TipoToken.espacio && 
+                            t.token.tipoToken != TipoToken.tabulador && 
+                            t.token.tipoToken != TipoToken.finLinea)
                         {
                             Console.WriteLine($"Token: {t.token.Lexema}    Linea: {t.token.fila} Columna: {t.token.columna}");
                             entrada = t.entrada;
                             return t;
-                        } 
+                        }
                     }
-               }
+                }
                 if (t == null)
                 {
-                    
+
                     var tok = new Token
                     {
                         Lexema = actual.ToString(),
@@ -97,13 +93,28 @@ namespace Proyecto.Lexer
                     };
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"El Simbolo: {tok.Lexema}    Linea: {tok.fila} Columna: {tok.columna} es invalido.");
+                    Console.ForegroundColor = ConsoleColor.White;
                     return new ResultadoTokenizador
                     {
                         entrada = entrada,
                         token = tok
                     };
                 }
-            }
+            } 
+            
+            var to = new Token
+            {
+                Lexema = "finArchivo",
+                fila = entrada.posicion.linea,
+                columna = entrada.posicion.columna,
+                tipoToken = TipoToken.finArchivo
+            };
+            Console.WriteLine($"Token: {to.Lexema}    Linea: {to.fila} Columna: {to.columna}");
+            return new ResultadoTokenizador
+            {
+                entrada = entrada,
+                token = to
+            };
         } 
 
         private char siguienteChar()

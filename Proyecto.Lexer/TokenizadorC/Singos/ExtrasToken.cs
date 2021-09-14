@@ -15,10 +15,25 @@ namespace Proyecto.Lexer.TokenizadorC.Singos
             {
                 var t = new Token
                 {
-                    Lexema = " ",
+                    Lexema = "espacio",
                     fila = e.posicion.linea,
                     columna = e.posicion.columna,
                     tipoToken = TipoToken.espacio
+                };
+                return new ResultadoTokenizador
+                {
+                    entrada = e,
+                    token = t
+                };
+            }
+            else if (tok == "\t")
+            {
+                var t = new Token
+                {
+                    Lexema = "tabulador",
+                    fila = e.posicion.linea,
+                    columna = e.posicion.columna,
+                    tipoToken = TipoToken.tabulador
                 };
                 return new ResultadoTokenizador
                 {
@@ -30,10 +45,25 @@ namespace Proyecto.Lexer.TokenizadorC.Singos
             {
                 var t = new Token
                 {
-                    Lexema = "\n",
+                    Lexema = "finLinea",
                     fila = e.posicion.linea,
                     columna = e.posicion.columna,
                     tipoToken = TipoToken.finLinea
+                };
+                return new ResultadoTokenizador
+                {
+                    entrada = e,
+                    token = t
+                };
+            }
+            else if (tok == "\0")
+            {
+                var t = new Token
+                {
+                    Lexema = "0",
+                    fila = e.posicion.linea,
+                    columna = e.posicion.columna,
+                    tipoToken = TipoToken.finArchivo
                 };
                 return new ResultadoTokenizador
                 {

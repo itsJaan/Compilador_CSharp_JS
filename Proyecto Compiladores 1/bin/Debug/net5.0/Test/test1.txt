@@ -1,18 +1,21 @@
-﻿using Proyecto.Lexer;
+﻿using Proyect.Lexer;
 using System;
 using System.IO;
 
-namespace Proyecto_Compiladores_1
+public class Clase1
 {
-    public class main
-    {
-        static void Main(string[] args)
-        {
-            ^#
-            var entrada = new Entrada(code);
-            var escaner = new Escaner(entrada);
-            escaner.proximoToken();
+	public int prop1 {get ; set;}
+	public int prop2 { get; }
 
-        }
-    }
+	public int funcion1(int param1 , int param2)
+	{
+		if(param1 == 0 && param2 >= 1)
+		{
+			Console.WriteLine("Hola");
+		}
+
+		int x = 0 + ( 2 * 4) + 1;
+		bool b = false;
+		Datetime date = new DateTime(10,10,2021,12,00,00);
+	}
 }

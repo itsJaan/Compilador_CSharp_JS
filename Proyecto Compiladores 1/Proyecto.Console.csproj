@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Proyecto.Lexer\Proyecto.Lexer.csproj" />
+    <ProjectReference Include="..\Proyecto.Parser\Proyecto.Parser.csproj" />
   </ItemGroup>
 
   <ItemGroup>

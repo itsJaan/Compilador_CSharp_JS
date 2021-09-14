@@ -27,7 +27,9 @@ namespace Proyecto.Lexer
         {
             if(longitud == 0)
             {
-                return Resultado.vacio<char>(this);
+                
+                var en = new Entrada(codFuente, posicion, 0);
+                return Resultado.valor('\0', en);
             }
             var caracter = codFuente[posicion.absoluta];
             var e = new Entrada(codFuente, posicion.moverPuntero(caracter), longitud - 1);

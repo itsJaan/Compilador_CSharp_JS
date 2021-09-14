@@ -26,6 +26,21 @@ namespace Proyecto.Lexer.TokenizadorC
                     token = t
                 };
             }
+            else if (tok == "$")
+            {
+                var t = new Token
+                {
+                    Lexema = "$",
+                    fila = e.posicion.linea,
+                    columna = e.posicion.columna,
+                    tipoToken = TipoToken.sDolar
+                };
+                return new ResultadoTokenizador
+                {
+                    entrada = e,
+                    token = t
+                };
+            }
             return null;
         }
     }

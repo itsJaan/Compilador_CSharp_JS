@@ -1,4 +1,6 @@
 ﻿using Proyecto.Lexer;
+using Proyecto.Lexer.Tokens;
+using Proyecto.Parser;
 using System;
 using System.IO;
 
@@ -11,12 +13,20 @@ namespace Proyecto_Compiladores_1
             var code = File.ReadAllText("D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto Compiladores 1\\Test\\test1.txt").Replace(Environment.NewLine, "\n");
             var entrada = new Entrada(code);
             var escaner = new Escaner(entrada);
-            var res=escaner.proximoToken();
+           
 
-            while (res != null)
+            Console.WriteLine("Verificacion Lexica en Proceso...");
+            var res=escaner.proximoToken();
+            while (res.token.tipoToken != TipoToken.finArchivo)
             {
                 res=escaner.proximoToken();
             }
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("Parseo en Proceso...");
+            var escanerParser = new Escaner(entrada);
+            var parser = new Parser(escanerParser);
+            parser.Parsear();
+
         }
     }
 }

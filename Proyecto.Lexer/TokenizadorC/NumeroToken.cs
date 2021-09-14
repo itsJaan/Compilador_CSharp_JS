@@ -13,24 +13,43 @@ namespace Proyecto.Lexer.TokenizadorC
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
             string tokCompleto = "";
-            if (tok == "0" || tok == "1" || tok == "2" || tok == "3"|| tok == "4" || tok == "5"
-                || tok == "6" || tok == "7" ||tok == "8" || tok == "9" )
+            if (tok == "0" || tok == "1" || tok == "2" || tok == "3" || tok == "4" || tok == "5"
+                || tok == "6" || tok == "7" || tok == "8" || tok == "9")
             {
                 int cont = 0;
                 tokCompleto += tok;
                 var esFloat = false;
+                var esOperacion = false;
                 var sig = e.charProximo();
 
-                while(sig.valor =='0'|| sig.valor == '1' || sig.valor == '2' || sig.valor == '3' || sig.valor == '4' ||
-                        sig.valor == '5' || sig.valor == '6' || sig.valor == '7' || sig.valor == '8' || sig.valor == '9' || sig.valor=='.')
+                while (sig.valor == '0' || sig.valor == '1' || sig.valor == '2' || sig.valor == '3' || sig.valor == '4' ||
+                        sig.valor == '5' || sig.valor == '6' || sig.valor == '7' || sig.valor == '8' || sig.valor == '9' ||
+                        sig.valor == '.' || sig.valor =='+' || sig.valor == '-' || sig.valor=='*' || sig.valor == '/' || sig.valor == '%')
                 {
                     if (sig.valor == '.') esFloat =true;
+                    if (sig.valor == '+' || sig.valor == '-' || sig.valor == '*' || sig.valor == '/' || sig.valor == '%') esOperacion = true;
                     tokCompleto += sig.valor;
                     e = sig.restante;
                     sig = e.charProximo();
                     cont++;
                 }
-                if (!esFloat) {
+                if (esOperacion)
+                {
+                    var t = new Token
+                    {
+                        Lexema = tokCompleto,
+                        fila = e.posicion.linea,
+                        columna = (e.posicion.columna - cont),
+                        tipoToken = TipoToken.operacionAritmetica
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
+                else if (!esFloat) 
+                {
                     var t = new Token
                     {
                         Lexema = tokCompleto,

@@ -1,0 +1,47 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "Proyecto.Parser/1.0.0": {
+        "dependencies": {
+          "Proyecto.ArbolAbstracto": "1.0.0",
+          "Proyecto.Lexer": "1.0.0"
+        },
+        "runtime": {
+          "Proyecto.Parser.dll": {}
+        }
+      },
+      "Proyecto.ArbolAbstracto/1.0.0": {
+        "runtime": {
+          "Proyecto.ArbolAbstracto.dll": {}
+        }
+      },
+      "Proyecto.Lexer/1.0.0": {
+        "runtime": {
+          "Proyecto.Lexer.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Proyecto.Parser/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Proyecto.ArbolAbstracto/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Proyecto.Lexer/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

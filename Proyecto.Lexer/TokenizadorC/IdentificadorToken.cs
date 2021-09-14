@@ -11,9 +11,10 @@ namespace Proyecto.Lexer.TokenizadorC
     {
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
-            string alfa = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+            string alfab = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 
-            if (tok == "g" || tok == "G"
+            if (tok == "a" || tok == "A"
+               || tok == "g" || tok == "G"
                || tok == "h" || tok == "H"
                || tok == "j" || tok == "J"
                || tok == "k" || tok == "K"
@@ -27,15 +28,16 @@ namespace Proyecto.Lexer.TokenizadorC
                 var sig = e.charProximo();
                 string tokCompleto = tok;
                 int cont = 0;
-                if (alfa.Contains(sig.valor))
+                if (alfab.Contains(tok))
                 {
-                    while (alfa.Contains(sig.valor))
+                    while (alfab.Contains(sig.valor))
                     {
                         tokCompleto += sig.valor;
                         e = sig.restante;
                         sig = e.charProximo();
                         cont++;
                     }
+
                     var t = new Token
                     {
                         Lexema = tokCompleto,
@@ -49,6 +51,7 @@ namespace Proyecto.Lexer.TokenizadorC
                         token = t
                     };
                 }
+
             }
             return null;
         }

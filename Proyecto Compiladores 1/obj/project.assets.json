@@ -2,6 +2,16 @@
   "version": 3,
   "targets": {
     "net5.0": {
+      "Proyecto.ArbolAbstracto/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v3.1",
+        "compile": {
+          "bin/placeholder/Proyecto.ArbolAbstracto.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Proyecto.ArbolAbstracto.dll": {}
+        }
+      },
       "Proyecto.Lexer/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
@@ -11,24 +21,48 @@
         "runtime": {
           "bin/placeholder/Proyecto.Lexer.dll": {}
         }
+      },
+      "Proyecto.Parser/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "Proyecto.ArbolAbstracto": "1.0.0",
+          "Proyecto.Lexer": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Proyecto.Parser.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Proyecto.Parser.dll": {}
+        }
       }
     }
   },
   "libraries": {
+    "Proyecto.ArbolAbstracto/1.0.0": {
+      "type": "project",
+      "path": "../Proyecto.ArbolAbstracto/Proyecto.ArbolAbstracto.csproj",
+      "msbuildProject": "../Proyecto.ArbolAbstracto/Proyecto.ArbolAbstracto.csproj"
+    },
     "Proyecto.Lexer/1.0.0": {
       "type": "project",
       "path": "../Proyecto.Lexer/Proyecto.Lexer.csproj",
       "msbuildProject": "../Proyecto.Lexer/Proyecto.Lexer.csproj"
+    },
+    "Proyecto.Parser/1.0.0": {
+      "type": "project",
+      "path": "../Proyecto.Parser/Proyecto.Parser.csproj",
+      "msbuildProject": "../Proyecto.Parser/Proyecto.Parser.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net5.0": [
-      "Proyecto.Lexer >= 1.0.0"
+      "Proyecto.Lexer >= 1.0.0",
+      "Proyecto.Parser >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Gem\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\nunez\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -36,15 +70,11 @@
       "projectUniqueName": "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto Compiladores 1\\Proyecto.Console.csproj",
       "projectName": "Proyecto.Console",
       "projectPath": "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto Compiladores 1\\Proyecto.Console.csproj",
-      "packagesPath": "C:\\Users\\Gem\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\nunez\\.nuget\\packages\\",
       "outputPath": "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto Compiladores 1\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Gem\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\nunez\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -60,6 +90,9 @@
           "projectReferences": {
             "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto.Lexer\\Proyecto.Lexer.csproj": {
               "projectPath": "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto.Lexer\\Proyecto.Lexer.csproj"
+            },
+            "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto.Parser\\Proyecto.Parser.csproj": {
+              "projectPath": "D:\\Documentos\\Repos VS\\Proyecto Compiladores 1\\Proyecto.Parser\\Proyecto.Parser.csproj"
             }
           }
         }
@@ -88,7 +121,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.302\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
       }
     }
   }
