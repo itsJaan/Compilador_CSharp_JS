@@ -15,6 +15,7 @@ namespace Proyecto.Lexer.Tokens
         operacionAritmetica,
         numeroFloat,
         sMas, sMenos, sDiv, sMult, sIgual,
+        sIgualIgual , sMayorIgual , sMenorIgual , sDistintoQue,
         sMod, sExcla, sMayor, sMenor, sAmpr, sOr,
         pInt, pFloat, pBool, pDatetime,
         pIn,

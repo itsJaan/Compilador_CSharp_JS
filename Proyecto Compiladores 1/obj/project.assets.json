@@ -4,7 +4,10 @@
     "net5.0": {
       "Proyecto.ArbolAbstracto/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v3.1",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "Proyecto.Lexer": "1.0.0"
+        },
         "compile": {
           "bin/placeholder/Proyecto.ArbolAbstracto.dll": {}
         },

@@ -13,18 +13,42 @@ namespace Proyecto.Lexer.TokenizadorC
         {
             if (tok == ">")
             {
-                var t = new Token
+                var sig = e.charProximo();
+
+                if (sig.valor == '=')
                 {
-                    Lexema = ">",
-                    fila = e.posicion.linea,
-                    columna = e.posicion.columna,
-                    tipoToken = TipoToken.sMayor
-                };
-                return new ResultadoTokenizador
+                    e = sig.restante;
+
+                    var t = new Token
+                    {
+                        Lexema = ">=",
+                        fila = e.posicion.linea,
+                        columna = e.posicion.columna - 1,
+                        tipoToken = TipoToken.sMayorIgual
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+
+                }
+                else
                 {
-                    entrada = e,
-                    token = t
-                };
+                    var t = new Token
+                    {
+                        Lexema = ">",
+                        fila = e.posicion.linea,
+                        columna = e.posicion.columna,
+                        tipoToken = TipoToken.sMayor
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
+               
             }
             return null;
         }

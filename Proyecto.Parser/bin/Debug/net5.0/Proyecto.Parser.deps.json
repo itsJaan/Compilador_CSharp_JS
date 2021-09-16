@@ -16,6 +16,9 @@
         }
       },
       "Proyecto.ArbolAbstracto/1.0.0": {
+        "dependencies": {
+          "Proyecto.Lexer": "1.0.0"
+        },
         "runtime": {
           "Proyecto.ArbolAbstracto.dll": {}
         }

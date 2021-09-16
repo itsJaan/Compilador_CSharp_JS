@@ -1,21 +1,25 @@
 ﻿using Proyect.Lexer;
 using System;
-using System.IO;
 
-public class Clase1
+public class Clase
 {
-	public int prop1 {get ; set;}
-	public int prop2 { get; }
-
-	public int funcion1(int param1 , int param2)
+	static void main()
 	{
-		if(param1 == 0 && param2 >= 1)
+		int a = 0;
+		bool y = false;
+
+		if (a == 0)
 		{
-			Console.WriteLine("Hola");
+			Console.WriteLine("puto");
+		}
+		else if(false != false) 
+		{
+			Console.Writeline("David");
+		}
+		else
+		{
+			break ;
 		}
 
-		int x = 0 + ( 2 * 4) + 1;
-		bool b = false;
-		Datetime date = new DateTime(10,10,2021,12,00,00);
 	}
 }

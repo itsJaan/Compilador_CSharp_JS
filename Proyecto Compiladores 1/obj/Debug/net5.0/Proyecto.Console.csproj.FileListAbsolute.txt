@@ -10,15 +10,15 @@ D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Console.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\ref\Proyecto.Console.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Console.pdb
+D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.ArbolAbstracto.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Lexer.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Parser.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Lexer.pdb
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.Parser.pdb
+D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.ArbolAbstracto.pdb
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\Proyecto.Console.csproj.AssemblyReference.cache
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\Proyecto.Console.csproj.CopyComplete
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\Proyecto.Console.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\ref\Proyecto.Console.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\Proyecto.Console.pdb
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\obj\Debug\net5.0\Proyecto.Console.genruntimeconfig.cache
-D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.ArbolAbstracto.dll
-D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto Compiladores 1\bin\Debug\net5.0\Proyecto.ArbolAbstracto.pdb

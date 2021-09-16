@@ -26,7 +26,7 @@ namespace Proyecto_Compiladores_1
             var escanerParser = new Escaner(entrada);
             var parser = new Parser(escanerParser);
             parser.Parsear();
-
+            
         }
     }
 }
