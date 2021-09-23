@@ -11,20 +11,63 @@ namespace Proyecto.Lexer.TokenizadorC.Singos
     {
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
+            string numeros = "1234567890";
+            string operador = "+-/*.() ";
+            string tokCompleto = "";
+            
             if (tok == "(")
             {
-                var t = new Token
+                int cont = 0;
+                tokCompleto += tok;
+                var esOperacion = false;
+                var sig = e.charProximo();
+
+                if (numeros.Contains(sig.valor))
                 {
-                    Lexema = "(",
-                    fila = e.posicion.linea,
-                    columna = e.posicion.columna,
-                    tipoToken = TipoToken.parentesisA
-                };
-                return new ResultadoTokenizador
+                    while (numeros.Contains(sig.valor) || operador.Contains(sig.valor))
+                    {
+                        if (operador.Contains(sig.valor))
+                            esOperacion = true;
+
+                        tokCompleto += sig.valor;
+                        e = sig.restante;
+                        sig = e.charProximo();
+                        cont++;
+                    }
+                }
+
+                if (esOperacion)
                 {
-                    entrada = e,
-                    token = t
-                };
+                    var t = new Token
+                    {
+                        Lexema = tokCompleto,
+                        fila = e.posicion.linea,
+                        columna = (e.posicion.columna - cont),
+                        tipoToken = TipoToken.operacionAritmetica
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
+                else
+                {
+
+
+                    var t = new Token
+                    {
+                        Lexema = "(",
+                        fila = e.posicion.linea,
+                        columna = e.posicion.columna,
+                        tipoToken = TipoToken.parentesisA
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
             }
             if (tok == ")")
             {

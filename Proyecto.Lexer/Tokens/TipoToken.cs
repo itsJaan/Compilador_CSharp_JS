@@ -56,6 +56,9 @@ namespace Proyecto.Lexer.Tokens
         tabulador,
         finLinea,
         finArchivo,
-        tokenInvalido
+        tokenInvalido,
+        pNull,
+        pList,
+        strEntreComilla
     }
 }

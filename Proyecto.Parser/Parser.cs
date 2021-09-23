@@ -20,12 +20,16 @@ namespace Proyecto.Parser
         private ResultadoTokenizador tokSig;
         private List<Error> errores;
         private Nodo Raiz;
+        private Ambiente ambienteRaiz;
+        private int tabs;
         
         public Parser(IEscaner sc)
         {
-            this.escaner = sc;
-            this.errores = new List<Error>();
-
+            escaner = sc;
+            errores = new List<Error>();
+            Raiz = new Nodo(null);
+            ambienteRaiz = new Ambiente(null);
+            tabs = 0;
         }
         private void move()
         {
@@ -35,20 +39,18 @@ namespace Proyecto.Parser
         {
             if(this.tokSig.token.tipoToken != tipo)
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Error error = new Error(this.tokSig.token.fila, this.tokSig.token.columna, tipo.ToString());
-                this.errores.Add(error);
-                this.move();
+                Error error = new Error(tokSig.token.fila, tokSig.token.columna,tokSig.token.tipoToken.ToString(), tipo.ToString());
+                errores.Add(error);
+                return;
             }
-            this.move();
+            else
+                move();
         }
         public void Parsear()
         {
             move();
-            Raiz = new Nodo(null);
             UC();
-
-            if (this.errores.Count == 0)
+            if (errores.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine("Succesful");
@@ -56,10 +58,10 @@ namespace Proyecto.Parser
             }
             else
             {
-                foreach(Error e in this.errores)
+                foreach(Error e in errores)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine($"Syntax Error Linea: {e.fila} Columna: {e.columna} se esperaba un {e.lexema}");
+                    Console.WriteLine($"Syntax Error: Se recibio {e.lexema} en Fila: {e.fila} Columna: {e.columna} se esperaba un {e.waiting}");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
             }
@@ -72,11 +74,13 @@ namespace Proyecto.Parser
         }
         private void IMPORTS(Nodo padre)
         {
+
             Nodo nImport = new Nodo(padre);
             nImport.Name = "Import";
 
             if (tokSig.token.tipoToken != TipoToken.pUsing)
             {
+
                 return;
             }
             var hijo = IMPORT(nImport);
@@ -85,6 +89,7 @@ namespace Proyecto.Parser
         }
         private Nodo IMPORT(Nodo padre)
         {
+            
             Nodo hijo = new Nodo(padre);
 
             hijo.Token = tokSig.token;
@@ -92,11 +97,28 @@ namespace Proyecto.Parser
             match(TipoToken.pUsing);
 
             padre = IDENTIFICADOR(padre);
-            
+ 
             Nodo hijoaux = new Nodo(padre);
             hijoaux.Token = tokSig.token;
             padre.Hijos.Add(hijoaux);
             match(TipoToken.sPuntoComa);
+
+
+            string key = "";
+            foreach(Nodo n in padre.Hijos)
+            {
+                if (n.Token != null)
+                {
+                    if (n.Token.tipoToken == TipoToken.identificador || n.Token.tipoToken == TipoToken.sPunto)
+                    {
+                        key += n.Token.Lexema;
+                    }
+                }
+            }
+
+            bool exists = ambienteRaiz.Add(key,padre);
+            if(!exists)
+                ambienteRaiz.ValidImport(key ,padre);
 
             return padre;
         }
@@ -131,6 +153,7 @@ namespace Proyecto.Parser
         }
         private Nodo CLASS(Nodo padre)
         {
+            Ambiente ambienteClase = new Ambiente(ambienteRaiz);
             Nodo hijo = new Nodo(padre);
             hijo.Token = tokSig.token;
             padre.Hijos.Add(hijo);
@@ -148,9 +171,23 @@ namespace Proyecto.Parser
             padre.Hijos.Add(hijoLlaveA);
             match(TipoToken.llaveA);
 
+            string key = "";
+            foreach (Nodo n in padre.Hijos)
+            {
+                if (n.Token != null) {
+                    if (n.Token.tipoToken == TipoToken.identificador)
+                    {
+                        key += n.Token.Lexema;
+                    }
+                }
+            }
+            bool exists = ambienteRaiz.Add(key, padre);
+            if (!exists)
+                ambienteRaiz.ValidClassDeclaration(key, padre);
+
             Nodo hijoInClass = new Nodo(padre);
             hijoInClass.Name = "InClass";
-            hijoInClass = INCLASSN(hijoInClass);
+            hijoInClass = INCLASSN(hijoInClass, ambienteClase);
             padre.Hijos.Add(hijoInClass);
 
             Nodo hijoLlaveC = new Nodo(padre);
@@ -158,21 +195,27 @@ namespace Proyecto.Parser
             padre.Hijos.Add(hijoLlaveC);
             match(TipoToken.llaveC);
 
+
+            if (!exists)
+                ambienteRaiz.Close(tabs);
+        
             return padre;
         }
-        private Nodo INCLASSN(Nodo padre)
+        private Nodo INCLASSN(Nodo padre , Ambiente ambientePadre)
         {
             Nodo hijo = new Nodo(padre);
             if (tokSig.token.tipoToken == TipoToken.llaveC)
             {
                 return padre;
             }
-            hijo = INCLASS(hijo);
+            hijo = INCLASS(hijo, ambientePadre);
             padre.Hijos.Add(hijo);
-            return INCLASSN(padre);
+            return INCLASSN(padre , ambientePadre);
         }
-        private Nodo INCLASS(Nodo padre)
+        private Nodo INCLASS(Nodo padre, Ambiente ambientePadre)
         {
+            tabs++;
+            Ambiente ambienteInClass = new Ambiente(ambientePadre);
             //SI ES MAIN
             if (this.tokSig.token.tipoToken == TipoToken.pStatic)
             {
@@ -206,16 +249,17 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
 
-
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "InMain";
-                hijoInMain = INMAINN(hijoInMain);
+                hijoInMain = INMAINN(hijoInMain, ambienteInClass);
                 padre.Hijos.Add(hijoInMain);
 
                 Nodo hijoLlaveC = new Nodo(padre);
                 hijoLlaveC.Token = tokSig.token;
                 padre.Hijos.Add(hijoLlaveC);
                 match(TipoToken.llaveC);
+                
+                tabs--;
                 return padre; 
             }
             //SI NO ES MAIN
@@ -231,7 +275,7 @@ namespace Proyecto.Parser
                     Nodo hijoFloat = new Nodo(padre);
                     hijoFloat.Token = tokSig.token;
                     padre.Hijos.Add(hijoFloat);
-                    match(TipoToken.pFloat);
+                    match(TipoToken.pFloat);                    
                 }
                 else if (this.tokSig.token.tipoToken == TipoToken.pBool)
                 {
@@ -260,13 +304,34 @@ namespace Proyecto.Parser
                     hijoVoid.Token = tokSig.token;
                     padre.Hijos.Add(hijoVoid);
                     match(TipoToken.pVoid);
+                }//LISTA 
+                else if (tokSig.token.tipoToken == TipoToken.pList)
+                {
+                    Nodo hijoVoid = new Nodo(padre);
+                    hijoVoid.Token = tokSig.token;
+                    padre.Hijos.Add(hijoVoid);
+                    match(TipoToken.pVoid);
                 }
 
+
                 padre = IDENTIFICADOR(padre);
+
+                string key = "";
+                foreach (Nodo n in padre.Hijos)
+                {
+                    if (n.Token != null)
+                    {
+                        if (n.Token.tipoToken == TipoToken.identificador)
+                        {
+                            key += n.Token.Lexema;
+                        }
+                    }
+                }
 
                 //FUNCION
                 if (tokSig.token.tipoToken == TipoToken.parentesisA)
                 {
+                    
                     Nodo hijoParA = new Nodo(padre);
                     hijoParA.Token = tokSig.token;
                     padre.Hijos.Add(hijoParA);
@@ -289,16 +354,22 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoLlaveA);
                     match(TipoToken.llaveA);
 
+                    bool exists = ambientePadre.Add(key, padre);
+                    if (!exists)
+                        ambientePadre.ValidFunctionDecl(key, padre , tabs);
+                    
                     Nodo hijoInMain = new Nodo(padre);
-                    hijoInMain.Name = "InMain";
-                    hijoInMain = INMAINN(hijoInMain);
+                    hijoInMain.Name = "InFuncion";
+                    hijoInMain = INMAINN(hijoInMain, ambienteInClass);
                     padre.Hijos.Add(hijoInMain);
-
+                    
                     Nodo hijoLlaveC = new Nodo(padre);
                     hijoLlaveC.Token = tokSig.token;
                     padre.Hijos.Add(hijoLlaveC);
                     match(TipoToken.llaveC);
 
+                    ambientePadre.Close(tabs);
+                    tabs--;
                     return padre;
                 }
                 //DECLARACION PROP
@@ -337,6 +408,11 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoLlaveC);
                     match(TipoToken.llaveC);
 
+                    bool exists = ambientePadre.Add(key, padre);
+                    if (!exists)
+                        ambientePadre.ValidDeclaration(key, padre, tabs);
+
+                    tabs--;
                     return padre;
                 }
                 //DECLARACION ASIGNADA
@@ -348,7 +424,14 @@ namespace Proyecto.Parser
                     match(TipoToken.sIgual);
 
                     padre = DECLARACION_IGUAL(padre);
-                    
+
+
+
+
+                    bool exists = ambientePadre.Add(key, padre);
+                    if (!exists)
+                        ambientePadre.ValidDeclaration(key, padre, tabs);
+                    tabs--;
                     return padre;   
                 }
                 //DECLARACION NORMAL
@@ -358,45 +441,53 @@ namespace Proyecto.Parser
                     hijoPc.Token = tokSig.token;
                     padre.Hijos.Add(hijoPc);
                     match(TipoToken.sPuntoComa);
-
+                    
+                    bool exists = ambientePadre.Add(key, padre);
+                    if (!exists)
+                        ambientePadre.ValidDeclaration(key, padre, tabs);
+                    
+                    tabs--;
                     return padre;
                 }
             }
             return null;
         }
-        private Nodo INMAINN(Nodo padre)
+        private Nodo INMAINN(Nodo padre , Ambiente ambientePadre)
         {
             Nodo hijo = new Nodo(padre);
             if (tokSig.token.tipoToken == TipoToken.llaveC)
             {
                 return padre;
             }
-            hijo = INMAIN(hijo);
+            hijo = INMAIN(hijo, ambientePadre);
             padre.Hijos.Add(hijo);
-            return INMAINN(padre);
+            return INMAINN(padre, ambientePadre);
 
         }
-        private Nodo INMAIN(Nodo padre)
+        private Nodo INMAIN(Nodo padre ,Ambiente ambientePadre)
         {
+            tabs++;
+            
             if (tipoDato.Contains(tokSig.token.tipoToken))
             {
                 Nodo hijoDecl = new Nodo(padre);
                 hijoDecl.Name = "Declaracion";
-                hijoDecl = DECLARACION(hijoDecl);
+                hijoDecl = DECLARACION(hijoDecl ,ambientePadre);
                 padre.Hijos.Add(hijoDecl);
+                tabs--;
                 return padre;
             }
             else if (tipoStates.Contains(tokSig.token.tipoToken))
             {
                 Nodo hijoSentencia = new Nodo(padre);
                 hijoSentencia.Name = "Sentencia";
-                hijoSentencia = SENTENCIA(hijoSentencia);
+                hijoSentencia = SENTENCIA(hijoSentencia , ambientePadre);
                 padre.Hijos.Add(hijoSentencia);
+                tabs--;
                 return padre;
             }
             else if (tokSig.token.tipoToken == TipoToken.pConsole)
             {
-
                 Nodo hijoConsole = new Nodo(padre);
                 hijoConsole.Token = tokSig.token;
                 padre.Hijos.Add(hijoConsole);
@@ -417,18 +508,16 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoParA); 
                 match(TipoToken.parentesisA);
 
-                Nodo hijoComilla = new Nodo(padre);
-                hijoComilla.Token = tokSig.token;
-                padre.Hijos.Add(hijoComilla);
-                match(TipoToken.sComillaD);
-
-                padre = IDENTIFICADOR(padre);
-
-                Nodo hijoCommillaD = new Nodo(padre);
-                hijoCommillaD.Token = tokSig.token;
-                padre.Hijos.Add(hijoCommillaD);
-                match(TipoToken.sComillaD);
-
+                string key = "";
+                if(tokSig.token.tipoToken == TipoToken.strEntreComilla)
+                {
+                    Nodo hijoComilla = new Nodo(padre);
+                    hijoComilla.Token = tokSig.token;
+                    padre.Hijos.Add(hijoComilla);
+                    key= hijoComilla.Token.Lexema;
+                    match(TipoToken.strEntreComilla);
+                }
+                
                 Nodo hijoParC = new Nodo(padre);
                 hijoParC.Token = tokSig.token;
                 padre.Hijos.Add(hijoParC);
@@ -438,21 +527,69 @@ namespace Proyecto.Parser
                 hijoPc.Token = tokSig.token;
                 padre.Hijos.Add(hijoPc);
                 match(TipoToken.sPuntoComa);
-                
+
+
+                bool exists = ambientePadre.Add(key, padre);
+                if (!exists)
+                    ambientePadre.ValidConsole(key, padre, tabs);
+
+                tabs--;
                 return padre;
 
             }
             else if (tokSig.token.tipoToken == TipoToken.identificador)
             {
                 padre = IDENTIFICADOR(padre);
-                if(tokSig.token.tipoToken == TipoToken.sIgual)
+                string key = "";
+                bool decl = false;
+                bool declCompl = false;
+                bool incDec = false;
+                bool callF = false;
+                foreach (Nodo n in padre.Hijos)
+                {
+                    if (n.Token != null)
+                    {
+                        if (n.Token.tipoToken == TipoToken.identificador)
+                        {
+                            key += n.Token.Lexema;
+                        }
+                    }
+                }
+
+                if (tokSig.token.tipoToken == TipoToken.sIgual)
                 {
                     Nodo hijoIgual = new Nodo(padre);
                     hijoIgual.Token = tokSig.token;
                     padre.Hijos.Add(hijoIgual);
                     match(TipoToken.sIgual);
                     padre = DECLARACION_IGUAL(padre);
+
+                    decl = true;
                 
+                }
+                else if(tokSig.token.tipoToken == TipoToken.identificador)
+                {
+                    padre = IDENTIFICADOR(padre);
+                    if (tokSig.token.tipoToken == TipoToken.sPuntoComa)
+                    {
+                        Nodo hijoPc = new Nodo(padre);
+                        hijoPc.Token = tokSig.token;
+                        padre.Hijos.Add(hijoPc);
+                        match(TipoToken.sPuntoComa);
+                        decl = true;
+                    }
+                    else if (tokSig.token.tipoToken == TipoToken.sIgual)
+                    {
+                        Nodo hijoIgual = new Nodo(padre);
+                        hijoIgual.Token = tokSig.token;
+                        padre.Hijos.Add(hijoIgual);
+                        match(TipoToken.sIgual);
+
+                        padre = DECLARACION_IGUAL(padre);
+
+                        decl = true;
+                    }
+
                 }
                 else if (tokSig.token.tipoToken == TipoToken.sMas)
                 {
@@ -465,6 +602,13 @@ namespace Proyecto.Parser
                     hijoMas2.Token = tokSig.token;
                     padre.Hijos.Add(hijoMas2);
                     match(TipoToken.sMas);
+
+                    Nodo hijoPc = new Nodo(padre);
+                    hijoPc.Token = tokSig.token;
+                    padre.Hijos.Add(hijoPc);
+                    match(TipoToken.sPuntoComa);
+
+                    incDec = true;
 
                 }
                 else if (tokSig.token.tipoToken == TipoToken.sMenos)
@@ -479,14 +623,42 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoMenos2);
                     match(TipoToken.sMenos);
 
+                    Nodo hijoPc = new Nodo(padre);
+                    hijoPc.Token = tokSig.token;
+                    padre.Hijos.Add(hijoPc);
+                    match(TipoToken.sPuntoComa);
+
+                    incDec = true;
+
                 }
                 else
+                {
                     padre = FUNCIONCALL(padre);
+                    callF = true;
+                }
 
+                bool exists = ambientePadre.Add(key, padre);
+                if (!exists)
+                {
+                    if (declCompl ||decl)
+                    {
+                        ambientePadre.ValidDeclaration(key, padre, tabs);
+                    }
+                    else if (incDec)
+                    {
+                        ambientePadre.ValidIncDec(key, padre, tabs);
+                    }
+                    else if(callF)
+                    {
+                        ambientePadre.ValidFunctionCall(key, padre, tabs);
+                    }
+                }
+                tabs--;
                 return padre;
             }
             else if(tokSig.token.tipoToken == TipoToken.pBreak)
             {
+                string key = "";
                 Nodo hijoBreak = new Nodo(padre);
                 hijoBreak.Token = tokSig.token;
                 padre.Hijos.Add(hijoBreak);
@@ -497,10 +669,72 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoPc);
                 match(TipoToken.sPuntoComa);
 
+
+                key = "break" + tabs;
+               
+                bool exists = ambientePadre.Add(key, padre);
+                if (!exists)
+                    ambientePadre.ValidBreak(key, padre, tabs);
+
+                tabs--;
+                return padre;
+            }
+            else if (tokSig.token.tipoToken == TipoToken.pReturn)
+            {
+                string key = "r";
+                Nodo hijoReturn = new Nodo(padre);
+                hijoReturn.Token = tokSig.token;
+                padre.Hijos.Add(hijoReturn);
+                match(TipoToken.pReturn);
+
+                if (tokSig.token.tipoToken == TipoToken.identificador)
+                {
+                    padre = IDENTIFICADOR(padre);
+                    
+                    foreach (Nodo n in padre.Hijos)
+                    {
+                        if (n.Token != null)
+                        {
+                            if (n.Token.tipoToken == TipoToken.identificador)
+                            {
+                                key += n.Token.Lexema;
+                            }
+                        }
+                    }
+
+                }
+                else if (tokSig.token.tipoToken == TipoToken.numeroEntero)
+                {
+                    
+                    Nodo hijoNum = new Nodo(padre);
+                    hijoNum.Token = tokSig.token;
+                    padre.Hijos.Add(hijoNum);
+
+                    key = tokSig.token.Lexema;
+                    match(TipoToken.numeroEntero);
+
+                }
+                else if (tokSig.token.tipoToken == TipoToken.pNull)
+                {
+                    Nodo hijoNull = new Nodo(padre);
+                    hijoNull.Token = tokSig.token;
+                    padre.Hijos.Add(hijoNull);
+                    key = "nullReturn" + tabs;
+                    match(TipoToken.pNull);
+                }
+                Nodo hijoPc = new Nodo(padre);
+                hijoPc.Token = tokSig.token;
+                padre.Hijos.Add(hijoPc);
+                match(TipoToken.sPuntoComa);
+
+                bool exists = ambientePadre.Add(key, padre);
+                if (!exists)
+                    ambientePadre.ValidReturn(key, padre, tabs);
+
+                tabs--;
                 return padre;
             }
             return null;
-
         }
         private Nodo FUNCIONCALL(Nodo padre)
         {
@@ -629,8 +863,9 @@ namespace Proyecto.Parser
             }
             return padre;
         }
-        private Nodo SENTENCIA(Nodo padre)
-        {
+        private Nodo SENTENCIA(Nodo padre, Ambiente ambientePadre)
+        {   
+            Ambiente ambienteSentencia = new Ambiente(ambienteRaiz);
             if(tokSig.token.tipoToken == TipoToken.pIf)
             {
                 
@@ -659,16 +894,18 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
 
+                ambientePadre.ValidIf(padre, tabs);
+
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "In IF";
-                hijoInMain = INMAINN(hijoInMain);
+                hijoInMain = INMAINN(hijoInMain , ambienteSentencia);
                 padre.Hijos.Add(hijoInMain);
 
                 Nodo hijoLlaveC = new Nodo(padre);
                 hijoLlaveC.Token = tokSig.token;
                 padre.Hijos.Add(hijoLlaveC);
                 match(TipoToken.llaveC);
-
+                ambienteSentencia.Close(tabs);
                 
                 if(tokSig.token.tipoToken == TipoToken.pElse)
                 {
@@ -703,9 +940,11 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
 
+                ambienteSentencia.ValidForeach(padre, tabs);
+
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "In Foreach";
-                hijoInMain = INMAINN(hijoInMain);
+                hijoInMain = INMAINN(hijoInMain, ambienteSentencia);
                 padre.Hijos.Add(hijoInMain);
 
 
@@ -713,6 +952,8 @@ namespace Proyecto.Parser
                 hijoLlaveC.Token = tokSig.token;
                 padre.Hijos.Add(hijoLlaveC);
                 match(TipoToken.llaveC);
+
+                ambienteSentencia.Close(tabs);
                 
             }
             else if (tokSig.token.tipoToken == TipoToken.pWhile)
@@ -742,9 +983,11 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
 
+                ambienteSentencia.ValidWhile(padre, tabs);
+
                 Nodo hijoInMain = new Nodo(padre);
-                hijoInMain.Name = "In Foreach";
-                hijoInMain = INMAINN(hijoInMain);
+                hijoInMain.Name = "In While";
+                hijoInMain = INMAINN(hijoInMain, ambienteSentencia);
                 padre.Hijos.Add(hijoInMain);
 
                 Nodo hijoLlaveC = new Nodo(padre);
@@ -752,6 +995,7 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveC);
                 match(TipoToken.llaveC);
 
+                ambienteSentencia.Close(tabs);
             }
             return padre;
             
@@ -768,6 +1012,7 @@ namespace Proyecto.Parser
         }
         private Nodo ELSEIF(Nodo padre)
         {
+            Ambiente ambienteElse = new Ambiente(ambienteRaiz);
             Nodo hijoElse = new Nodo(padre);
             hijoElse.Token = tokSig.token;
             padre.Hijos.Add(hijoElse);
@@ -802,7 +1047,7 @@ namespace Proyecto.Parser
 
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "In Else If";
-                hijoInMain = INMAINN(hijoInMain);
+                hijoInMain = INMAINN(hijoInMain, ambienteElse);
                 padre.Hijos.Add(hijoInMain);
 
                 Nodo hijoLlaveC = new Nodo(padre);
@@ -819,7 +1064,7 @@ namespace Proyecto.Parser
 
                 Nodo hijoInMain2 = new Nodo(padre);
                 hijoInMain2.Name = "In Else";
-                hijoInMain2 = INMAINN(hijoInMain2);
+                hijoInMain2 = INMAINN(hijoInMain2 , ambienteElse);
                 padre.Hijos.Add(hijoInMain2);
 
                 Nodo hijoLlaveCelse = new Nodo(padre);
@@ -1336,8 +1581,9 @@ namespace Proyecto.Parser
 
 
         }
-        private Nodo DECLARACION(Nodo padre)
+        private Nodo DECLARACION(Nodo padre , Ambiente ambientePadre)
         {
+
             if (tokSig.token.tipoToken == TipoToken.pInt)
             {
                 Nodo hijoInt = new Nodo(padre);
@@ -1373,24 +1619,74 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoVar);
                 match(TipoToken.pVar);
             }
-            
-            
-            if (tokSig.token.tipoToken == TipoToken.bracketA)
+            else if (tokSig.token.tipoToken == TipoToken.pList)
             {
-                Nodo hijobracketA = new Nodo(padre);
-                hijobracketA.Token = tokSig.token;
-                padre.Hijos.Add(hijobracketA);
-                match(TipoToken.bracketA);
+                Nodo hijoVar = new Nodo(padre);
+                hijoVar.Token = tokSig.token;
+                padre.Hijos.Add(hijoVar);
+                match(TipoToken.pList);
 
-                Nodo hijobracketC = new Nodo(padre);
-                hijobracketC.Token = tokSig.token;
-                padre.Hijos.Add(hijobracketC);
-                match(TipoToken.bracketC);
+                Nodo hijoMenor = new Nodo(padre);
+                hijoMenor.Token = tokSig.token;
+                padre.Hijos.Add(hijoMenor);
+                match(TipoToken.sMenor);
+
+                if (tokSig.token.tipoToken == TipoToken.identificador)
+                {
+                    padre = IDENTIFICADOR(padre);
+                }
+                else if (tipoDato.Contains(tokSig.token.tipoToken))
+                {
+                    if(tokSig.token.tipoToken == TipoToken.pInt)
+                    {
+                        Nodo hijoInt = new Nodo(padre);
+                        hijoInt.Token = tokSig.token;
+                        padre.Hijos.Add(hijoInt);
+                        match(TipoToken.pInt);
+                    }
+                    else if (tokSig.token.tipoToken == TipoToken.pFloat)
+                    {
+                        Nodo hijoInt = new Nodo(padre);
+                        hijoInt.Token = tokSig.token;
+                        padre.Hijos.Add(hijoInt);
+                        match(TipoToken.pFloat);
+                    }
+                    else if (tokSig.token.tipoToken == TipoToken.pDatetime)
+                    {
+                        Nodo hijoDateTime = new Nodo(padre);
+                        hijoDateTime.Token = tokSig.token;
+                        padre.Hijos.Add(hijoDateTime);
+                        match(TipoToken.pDatetime);
+                    }
+                    else if (tokSig.token.tipoToken == TipoToken.pBool)
+                    {
+                        Nodo hijoBool = new Nodo(padre);
+                        hijoBool.Token = tokSig.token;
+                        padre.Hijos.Add(hijoBool);
+                        match(TipoToken.pBool);
+                    }
+                    Nodo hijoMayor = new Nodo(padre);
+                    hijoMayor.Token = tokSig.token;
+                    padre.Hijos.Add(hijoMayor);
+                    match(TipoToken.sMayor);
+
+                }
             }
 
             padre = IDENTIFICADOR(padre);
+            string key = "";
+            foreach (Nodo n in padre.Hijos)
+            {
+                if (n.Token != null)
+                {
+                    if (n.Token.tipoToken == TipoToken.identificador)
+                    {
+                        key += n.Token.Lexema;
+                    }
+                }
+            }
 
-            if(tokSig.token.tipoToken == TipoToken.sPuntoComa)
+            if (tokSig.token.tipoToken == TipoToken.sPuntoComa)
             {
                 Nodo hijoPc = new Nodo(padre);
                 hijoPc.Token = tokSig.token;
@@ -1406,6 +1702,11 @@ namespace Proyecto.Parser
 
                 padre = DECLARACION_IGUAL(padre);
             }
+
+            bool exists = ambientePadre.Add(key, padre);
+            if (!exists)
+                ambientePadre.ValidDeclaration(key, padre, tabs);
+
             return padre;
 
         }
@@ -1417,11 +1718,6 @@ namespace Proyecto.Parser
                 hijoNumeroEntero.Token = tokSig.token;
                 padre.Hijos.Add(hijoNumeroEntero);
                 match(TipoToken.numeroEntero);
-
-                if (tipoAritm.Contains(tokSig.token.tipoToken))
-                {
-                    padre = OPERACIONARITMETICA(padre);
-                }
 
                 Nodo hijoPc = new Nodo(padre);
                 hijoPc.Token = tokSig.token;
@@ -1436,12 +1732,7 @@ namespace Proyecto.Parser
                 hijoNumeroFloat.Token = tokSig.token;
                 padre.Hijos.Add(hijoNumeroFloat);
                 match(TipoToken.numeroFloat);
-                
-                if (tipoAritm.Contains(tokSig.token.tipoToken))
-                {
-                    padre = OPERACIONARITMETICA(padre);
-                }
-
+            
                 Nodo hijoPc = new Nodo(padre);
                 hijoPc.Token = tokSig.token;
                 padre.Hijos.Add(hijoPc);
@@ -1477,8 +1768,24 @@ namespace Proyecto.Parser
 
                 return padre;
             }
-            else if (this.tokSig.token.tipoToken == TipoToken.pNew)
+            else if (this.tokSig.token.tipoToken == TipoToken.operacionAritmetica)
             {
+                Nodo hijoTrue = new Nodo(padre);
+                hijoTrue.Token = tokSig.token;
+                padre.Hijos.Add(hijoTrue);
+                match(TipoToken.operacionAritmetica);
+
+                Nodo hijoPc = new Nodo(padre);
+                hijoPc.Token = tokSig.token;
+                padre.Hijos.Add(hijoPc);
+                match(TipoToken.sPuntoComa);
+
+                return padre;
+            }
+            else if (this.tokSig.token.tipoToken == TipoToken.pNew)
+            {   
+                //IDENTIFICADOR
+                //LIST
                 //new DateTime(año, mes, dia, hora, minuto, segundo);
                 Nodo hijoNew = new Nodo(padre);
                 hijoNew.Token = tokSig.token;
@@ -1498,57 +1805,7 @@ namespace Proyecto.Parser
                 Nodo hijoNumeroEntero = new Nodo(padre);
                 hijoNumeroEntero.Token = tokSig.token;
                 padre.Hijos.Add(hijoNumeroEntero);
-                match(TipoToken.numeroEntero);
-
-                Nodo hijoComa1 = new Nodo(padre);
-                hijoComa1.Token = tokSig.token;
-                padre.Hijos.Add(hijoComa1);
-                match(TipoToken.sComa);
-
-                Nodo hijoNumeroEntero1 = new Nodo(padre);
-                hijoNumeroEntero1.Token = tokSig.token;
-                padre.Hijos.Add(hijoNumeroEntero1);
-                match(TipoToken.numeroEntero);
-
-                Nodo hijoComa2 = new Nodo(padre);
-                hijoComa2.Token = tokSig.token;
-                padre.Hijos.Add(hijoComa2);
-                match(TipoToken.sComa);
-
-                Nodo hijoNumeroEntero2 = new Nodo(padre);
-                hijoNumeroEntero2.Token = tokSig.token;
-                padre.Hijos.Add(hijoNumeroEntero2);
-                match(TipoToken.numeroEntero);
-
-                Nodo hijoComa3 = new Nodo(padre);
-                hijoComa3.Token = tokSig.token;
-                padre.Hijos.Add(hijoComa3);
-                match(TipoToken.sComa);
-
-                Nodo hijoNumeroEntero3 = new Nodo(padre);
-                hijoNumeroEntero3.Token = tokSig.token;
-                padre.Hijos.Add(hijoNumeroEntero3);
-                match(TipoToken.numeroEntero);
-
-                Nodo hijoComa4 = new Nodo(padre);
-                hijoComa4.Token = tokSig.token;
-                padre.Hijos.Add(hijoComa4);
-                match(TipoToken.sComa);
-
-                Nodo hijoNumeroEntero4 = new Nodo(padre);
-                hijoNumeroEntero4.Token = tokSig.token;
-                padre.Hijos.Add(hijoNumeroEntero4);
-                match(TipoToken.numeroEntero);
-
-                Nodo hijoComa5 = new Nodo(padre);
-                hijoComa5.Token = tokSig.token;
-                padre.Hijos.Add(hijoComa5);
-                match(TipoToken.sComa);
-
-                Nodo hijoNumeroEntero5 = new Nodo(padre);
-                hijoNumeroEntero5.Token = tokSig.token;
-                padre.Hijos.Add(hijoNumeroEntero5);
-                match(TipoToken.numeroEntero);
+                match(TipoToken.nDate);
 
                 Nodo hijoParC = new Nodo(padre);
                 hijoParC.Token = tokSig.token;
@@ -1596,121 +1853,24 @@ namespace Proyecto.Parser
 
                 return padre;
             }
-            else if (tokSig.token.tipoToken == TipoToken.parentesisA)
-            {
-                padre = OPERACIONARITMETICA(padre);
-
-                Nodo hijoPc = new Nodo(padre);
-                hijoPc.Token = tokSig.token;
-                padre.Hijos.Add(hijoPc);
-                match(TipoToken.sPuntoComa);
-                
-                return padre;
-            }
             else if (tokSig.token.tipoToken == TipoToken.identificador)
             {
                 padre = IDENTIFICADOR(padre);
+
                 if (tokSig.token.tipoToken == TipoToken.parentesisA)
                 {
                     padre = FUNCIONCALL(padre);
                     return padre;
                 }
-                else if (tipoAritm.Contains(tokSig.token.tipoToken))
-                {
-                    padre = OPERACIONARITMETICA(padre);
-
-                    Nodo hijoPc = new Nodo(padre);
-                    hijoPc.Token = tokSig.token;
-                    padre.Hijos.Add(hijoPc);
-                    match(TipoToken.sPuntoComa);
-                    
-                    return padre;
-                }
-                else
-                {
-                    Nodo hijoPc = new Nodo(padre);
-                    hijoPc.Token = tokSig.token;
-                    padre.Hijos.Add(hijoPc);
-                    match(TipoToken.sPuntoComa);
-
-                    return padre;
-                }
+                Nodo hijoPc = new Nodo(padre);
+                hijoPc.Token = tokSig.token;
+                padre.Hijos.Add(hijoPc);
+                match(TipoToken.sPuntoComa);
+                return padre;
             }
             else
                 return padre;
 
-        }
-        private Nodo OPERACIONARITMETICA(Nodo padre)
-        {
-            while(tokSig.token.tipoToken==TipoToken.numeroEntero || tokSig.token.tipoToken == TipoToken.numeroFloat || tipoAritm.Contains(tokSig.token.tipoToken))
-            {
-                if (tokSig.token.tipoToken == TipoToken.parentesisA)
-                {
-                    Nodo hijoParA = new Nodo(padre);
-                    hijoParA.Token = tokSig.token;
-                    padre.Hijos.Add(hijoParA);
-                    match(TipoToken.parentesisA);
-
-                    padre = OPERACIONARITMETICA(padre);
-
-                    Nodo hijoParC = new Nodo(padre);
-                    hijoParC.Token = tokSig.token;
-                    padre.Hijos.Add(hijoParC);
-                    match(TipoToken.parentesisC);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.numeroEntero)
-                {
-                    Nodo hijoParnumeroEntero = new Nodo(padre);
-                    hijoParnumeroEntero.Token = tokSig.token;
-                    padre.Hijos.Add(hijoParnumeroEntero);
-                    match(TipoToken.numeroEntero);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.numeroFloat)
-                {
-                    Nodo hijonumeroFloat = new Nodo(padre);
-                    hijonumeroFloat.Token = tokSig.token;
-                    padre.Hijos.Add(hijonumeroFloat);
-                    match(TipoToken.numeroFloat);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.sMas)
-                {
-                    Nodo hijosMas = new Nodo(padre);
-                    hijosMas.Token = tokSig.token;
-                    padre.Hijos.Add(hijosMas);
-                    match(TipoToken.sMas);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.sMenos)
-                {
-                    Nodo hijosMenos = new Nodo(padre);
-                    hijosMenos.Token = tokSig.token;
-                    padre.Hijos.Add(hijosMenos);
-                    match(TipoToken.sMenos);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.sMult)
-                {
-                    Nodo hijoMult = new Nodo(padre);
-                    hijoMult.Token = tokSig.token;
-                    padre.Hijos.Add(hijoMult);
-                    match(TipoToken.sMult);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.sDiv)
-                {
-                    Nodo hijoDiv = new Nodo(padre);
-                    hijoDiv.Token = tokSig.token;
-                    padre.Hijos.Add(hijoDiv);
-                    match(TipoToken.sDiv);
-                }
-                else if (tokSig.token.tipoToken == TipoToken.sMod)
-                {
-                    Nodo hijoMod = new Nodo(padre);
-                    hijoMod.Token = tokSig.token;
-                    padre.Hijos.Add(hijoMod);
-                    match(TipoToken.sMod);
-                }
-                else
-                    return padre;
-            }
-            return padre;
         }
     }
 } 

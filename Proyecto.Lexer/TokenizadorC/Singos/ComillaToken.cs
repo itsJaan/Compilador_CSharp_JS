@@ -28,18 +28,52 @@ namespace Proyecto.Lexer.TokenizadorC.Singos
             }
             if (tok == "\"")
             {
-                var t = new Token
+                string alfab = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                string tokCompleto = tok;
+                var sig = e.charProximo();
+                int cont = 0;
+
+                if (alfab.Contains(sig.valor))
                 {
-                    Lexema = "\"",
-                    fila = e.posicion.linea,
-                    columna = e.posicion.columna,
-                    tipoToken = TipoToken.sComillaD
-                };
-                return new ResultadoTokenizador
+                    while (sig.valor != '\"')
+                    {
+                        tokCompleto += sig.valor;
+                        e = sig.restante;
+                        sig = e.charProximo();
+                        cont++;
+                    }
+                    tokCompleto += sig.valor;
+                    e = sig.restante;
+                    sig = e.charProximo();
+
+                    var t = new Token
+                    {
+                        Lexema = tokCompleto,
+                        fila = e.posicion.linea,
+                        columna = e.posicion.columna,
+                        tipoToken = TipoToken.strEntreComilla
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
+                else
                 {
-                    entrada = e,
-                    token = t
-                };
+                    var t = new Token
+                    {
+                        Lexema = "\"",
+                        fila = e.posicion.linea,
+                        columna = e.posicion.columna,
+                        tipoToken = TipoToken.sComillaD
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+                }
             }
             return null;
         }

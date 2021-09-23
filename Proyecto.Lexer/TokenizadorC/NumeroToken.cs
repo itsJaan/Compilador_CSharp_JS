@@ -12,9 +12,11 @@ namespace Proyecto.Lexer.TokenizadorC
     {
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
+            string numeros = "1234567890";
+            string operador = "+-/*., ";
+            bool date = false;
             string tokCompleto = "";
-            if (tok == "0" || tok == "1" || tok == "2" || tok == "3" || tok == "4" || tok == "5"
-                || tok == "6" || tok == "7" || tok == "8" || tok == "9")
+            if (numeros.Contains(tok)) 
             {
                 int cont = 0;
                 tokCompleto += tok;
@@ -22,18 +24,42 @@ namespace Proyecto.Lexer.TokenizadorC
                 var esOperacion = false;
                 var sig = e.charProximo();
 
-                while (sig.valor == '0' || sig.valor == '1' || sig.valor == '2' || sig.valor == '3' || sig.valor == '4' ||
-                        sig.valor == '5' || sig.valor == '6' || sig.valor == '7' || sig.valor == '8' || sig.valor == '9' ||
-                        sig.valor == '.' || sig.valor =='+' || sig.valor == '-' || sig.valor=='*' || sig.valor == '/' || sig.valor == '%')
+                while (numeros.Contains(sig.valor) || operador.Contains(sig.valor))
                 {
-                    if (sig.valor == '.') esFloat =true;
-                    if (sig.valor == '+' || sig.valor == '-' || sig.valor == '*' || sig.valor == '/' || sig.valor == '%') esOperacion = true;
+                    if (sig.valor == '.')
+                        esFloat = true;
+                    else if (sig.valor == ',')
+                        date = true;
+
+                    
+
+                    if (operador.Contains(sig.valor)) 
+                        esOperacion = true;
+                    if (date && sig.valor == ')')
+                        break;
                     tokCompleto += sig.valor;
                     e = sig.restante;
                     sig = e.charProximo();
                     cont++;
                 }
-                if (esOperacion)
+
+                if (date)
+                {
+                    var t = new Token
+                    {
+                        Lexema = tokCompleto,
+                        fila = e.posicion.linea,
+                        columna = (e.posicion.columna - cont),
+                        tipoToken = TipoToken.nDate
+                    };
+                    return new ResultadoTokenizador
+                    {
+                        entrada = e,
+                        token = t
+                    };
+
+                }
+                else if (esOperacion)
                 {
                     var t = new Token
                     {

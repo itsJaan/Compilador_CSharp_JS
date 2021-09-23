@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Proyecto.Lexer.TokenizadorC.PalabrasReservadas
 {
-    public class NPalabraToken : IToken
+    public class LPalabraToken : IToken
     {
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
             string alfa = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
             string tokCompleto = "";
-            if (tok == "n" || tok == "N")
+            if (tok == "l" || tok == "L")
             {
                 int cont = 0;
                 tokCompleto += tok;
@@ -27,29 +27,14 @@ namespace Proyecto.Lexer.TokenizadorC.PalabrasReservadas
                     cont++;
                 }
 
-                if (tokCompleto.Equals("new", StringComparison.OrdinalIgnoreCase))
+                if (tokCompleto.Equals("List", StringComparison.OrdinalIgnoreCase))
                 {
                     var t = new Token
                     {
                         Lexema = tokCompleto,
                         fila = e.posicion.linea,
                         columna = (e.posicion.columna - cont),
-                        tipoToken = TipoToken.pNew
-                    };
-                    return new ResultadoTokenizador
-                    {
-                        entrada = e,
-                        token = t
-                    };
-                }
-                else if (tokCompleto.Equals("null", StringComparison.OrdinalIgnoreCase))
-                {
-                    var t = new Token
-                    {
-                        Lexema = tokCompleto,
-                        fila = e.posicion.linea,
-                        columna = (e.posicion.columna - cont),
-                        tipoToken = TipoToken.pNull
+                        tipoToken = TipoToken.pList
                     };
                     return new ResultadoTokenizador
                     {
@@ -75,5 +60,5 @@ namespace Proyecto.Lexer.TokenizadorC.PalabrasReservadas
             }
             return null;
         }
-     }
+    }
 }

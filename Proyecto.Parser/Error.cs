@@ -11,12 +11,14 @@ namespace Proyecto.Parser
         public int fila;
         public int columna;
         public string lexema;
+        public string waiting;
 
-        public Error( int f , int c, string l)
+        public Error( int f , int c, string l ,string w)
         {
             fila = f;
             columna = c;
             lexema = l;
+            waiting = w;
         }
     }
 }

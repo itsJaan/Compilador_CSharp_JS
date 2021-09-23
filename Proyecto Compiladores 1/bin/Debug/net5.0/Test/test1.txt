@@ -1,25 +1,40 @@
-﻿using Proyect.Lexer;
-using System;
-
-public class Clase
+﻿public class Clase
 {
-	static void main()
+	public void func()
 	{
-		int a = 0;
-		bool y = false;
+		DateTime date = new DateTime( 2021,10,11,12,00,00);
+		bool isTrue = false;
+		
+		if(cont <= 10)
+		{
+			return 2;
+		}
+		Clase clasep;
+		return 0;
+	}
+	public int func2(int v, int x)
+	{
+		Console.Writeline("funcion2");
+		int cont = 0;
+		while( cont <= 10)
+		{
+			Console.Writeline("while Funcion");
+			cont++;
+		}
+	}
+	public int prop3 = 123 + 31121;
+}
+public class clase2
+{
+	public int prop3 = 12;
 
-		if (a == 0)
+	public void func()
+	{
+		console.writeline("Clase 2 Func 1");
+		foreach(int number in numbers)
 		{
-			Console.WriteLine("puto");
+			console.writeline("ForEach");	
 		}
-		else if(false != false) 
-		{
-			Console.Writeline("David");
-		}
-		else
-		{
-			break
-		}
-
 	}
 }
+

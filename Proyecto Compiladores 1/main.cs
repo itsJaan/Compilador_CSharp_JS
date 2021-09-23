@@ -14,19 +14,15 @@ namespace Proyecto_Compiladores_1
             var entrada = new Entrada(code);
             var escaner = new Escaner(entrada);
            
-
-            Console.WriteLine("Verificacion Lexica en Proceso...");
-            var res=escaner.proximoToken();
-            while (res.token.tipoToken != TipoToken.finArchivo)
-            {
-                res=escaner.proximoToken();
-            }
-            Console.WriteLine("\n\n\n");
-            Console.WriteLine("Parseo en Proceso...");
+            //var res=escaner.proximoToken();
+            //while (res.token.tipoToken != TipoToken.finArchivo)
+            //{
+            //    res=escaner.proximoToken();
+            //}
             var escanerParser = new Escaner(entrada);
             var parser = new Parser(escanerParser);
             parser.Parsear();
-            
+
         }
     }
 }

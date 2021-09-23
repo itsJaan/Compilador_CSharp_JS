@@ -75,7 +75,7 @@ namespace Proyecto.Lexer
                             t.token.tipoToken != TipoToken.tabulador && 
                             t.token.tipoToken != TipoToken.finLinea)
                         {
-                            Console.WriteLine($"Token: {t.token.Lexema}    Linea: {t.token.fila} Columna: {t.token.columna}");
+                            //Console.WriteLine($"Token: {t.token.Lexema}    Linea: {t.token.fila} Columna: {t.token.columna}");
                             entrada = t.entrada;
                             return t;
                         }
@@ -109,7 +109,7 @@ namespace Proyecto.Lexer
                 columna = entrada.posicion.columna,
                 tipoToken = TipoToken.finArchivo
             };
-            Console.WriteLine($"Token: {to.Lexema}    Linea: {to.fila} Columna: {to.columna}");
+            //Console.WriteLine($"Token: {to.Lexema}    Linea: {to.fila} Columna: {to.columna}");
             return new ResultadoTokenizador
             {
                 entrada = entrada,

@@ -2,7 +2,6 @@ D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\bin\Debug\net5.0\P
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\bin\Debug\net5.0\Proyecto.Lexer.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\bin\Debug\net5.0\ref\Proyecto.Lexer.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\bin\Debug\net5.0\Proyecto.Lexer.pdb
-D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.csproj.AssemblyReference.cache
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.GeneratedMSBuildEditorConfig.editorconfig
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.AssemblyInfoInputs.cache
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.AssemblyInfo.cs
@@ -10,3 +9,4 @@ D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\P
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\ref\Proyecto.Lexer.dll
 D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.pdb
+D:\Documentos\Repos VS\Proyecto Compiladores 1\Proyecto.Lexer\obj\Debug\net5.0\Proyecto.Lexer.csproj.AssemblyReference.cache

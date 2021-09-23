@@ -15,7 +15,7 @@ namespace Proyecto.Lexer.Tokens
         public int columna { get; set; }
         public override string ToString()
         {
-            return $"{Lexema}         Linea: {fila}  Columna: {columna} \n";
+            return $"{Lexema}";
         }
 
     }

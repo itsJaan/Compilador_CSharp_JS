@@ -60,7 +60,7 @@ namespace Proyecto.Lexer.TokenizadorC.Singos
             {
                 var t = new Token
                 {
-                    Lexema = "0",
+                    Lexema = "finAcrhivo",
                     fila = e.posicion.linea,
                     columna = e.posicion.columna,
                     tipoToken = TipoToken.finArchivo
