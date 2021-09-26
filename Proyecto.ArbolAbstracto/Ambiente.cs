@@ -9,22 +9,24 @@ namespace Proyecto.ArbolAbstracto
 {
     public class Ambiente
     {
-        public Ambiente anterior { get; set; }
+        public Ambiente anterior { get; set;}
         public Dictionary<string, Nodo> tabla;
+        public Dictionary<string, Nodo> tablaAsign;
 
         public Ambiente(Ambiente a)
         {
             anterior = a;
             tabla = new Dictionary<string, Nodo>();
+            tablaAsign = new Dictionary<string, Nodo>();
         }
 
         public bool Add(string l, Nodo n)
         {
 
             try
-            {   
+            {
                 tabla.Add(l, n);
-                return false;
+                return false;    
             }
             catch (Exception e)
             {
@@ -35,11 +37,13 @@ namespace Proyecto.ArbolAbstracto
         }
         public Nodo GetEnvironment( string l)
         {
-            for (var ambienteActual = this; ambienteActual != null; ambienteActual = anterior)
-            {
+            Ambiente ambienteActual = this;
+            while (ambienteActual!= null) {
                 if (tabla.TryGetValue(l, out var found))
                     return found;
-            }    
+                else
+                    ambienteActual = anterior;
+            }   
             return null;
         }
         public void ValidImport(string key, Nodo nodo)
@@ -183,7 +187,9 @@ namespace Proyecto.ArbolAbstracto
             bool wIgual = false;    
             Token asign = new Token();
             Token fecha = new Token();
-
+            bool esLista = false;
+            bool param = false;
+            string asignLista = "";
             foreach (Nodo hijo in nodo.Hijos)
             {
                 if (hijo.Token != null)
@@ -208,26 +214,55 @@ namespace Proyecto.ArbolAbstracto
                     {
                         fecha = hijo.Token;
                     }
+                    else if (hijo.Token.tipoToken == TipoToken.pList)
+                    {
+                        esLista = true;
+                    }
+                    else if (hijo.Token.tipoToken == TipoToken.pPublic)
+                    {
+                        esPub = true;
+                    }
+                    
+                    if (hijo.Token.tipoToken == TipoToken.llaveC)
+                    {
+                        param = false;
+                    }
+                    else if (param)
+                    {
+                        asignLista += hijo.Token.Lexema;
+                    }
+                    else if(hijo.Token.tipoToken == TipoToken.llaveA)
+                    {
+                        param = true;
+                    }
                 }
             }
 
             string tabs = "";
             for (int i = 0; i < t; i++)
                 tabs += "\t";
-            
+
+            //if (asignLista == "")
+            //{
+                asignLista = fecha.Lexema;
+            //}
             if (esPub)
             {
                 if (wIgual)
                 {
-                    if (Ttipo.tipoToken == TipoToken.identificador || Ttipo.tipoToken == TipoToken.pDatetime)
+                    if (Ttipo.tipoToken == TipoToken.identificador || Ttipo.tipoToken == TipoToken.pDatetime || esLista)
                     {
-                        if (wiNew || Ttipo.tipoToken == TipoToken.pDatetime)
+                        if (wiNew && Ttipo.tipoToken == TipoToken.pDatetime)
                         {
                             Console.WriteLine($"{tabs}var {key} = new Date({fecha.Lexema});");
                         }
-                        else if (wiNew || Ttipo.tipoToken == TipoToken.identificador)
+                        else if (wiNew && Ttipo.tipoToken == TipoToken.identificador)
                         {
                             Console.WriteLine($"{tabs}var {key} = new {Ttipo.Lexema};");
+                        }
+                        else if(wiNew  && esLista)
+                        {
+                            Console.WriteLine($"{tabs}var {key} = [{asignLista}];");
                         }
                     }
                     else
@@ -244,15 +279,19 @@ namespace Proyecto.ArbolAbstracto
             {
                 if (wIgual)
                 {
-                    if (Ttipo.tipoToken == TipoToken.identificador || Ttipo.tipoToken == TipoToken.pDatetime)
+                    if (Ttipo.tipoToken == TipoToken.identificador || Ttipo.tipoToken == TipoToken.pDatetime || esLista)
                     {
-                        if (wiNew || Ttipo.tipoToken == TipoToken.pDatetime)
+                        if (wiNew && Ttipo.tipoToken == TipoToken.pDatetime)
                         {
                             Console.WriteLine($"{tabs}var {key} = new Date({fecha.Lexema});");
                         }
-                        else if (wiNew || Ttipo.tipoToken == TipoToken.identificador)
+                        else if (wiNew && Ttipo.tipoToken == TipoToken.identificador)
                         {
                             Console.WriteLine($"{tabs}var {key} = new {Ttipo.Lexema};");
+                        }
+                        else if (wiNew && esLista)
+                        {
+                            Console.WriteLine($"{tabs}var {key} = [{asignLista}];");
                         }
                     }
                     else
@@ -268,6 +307,7 @@ namespace Proyecto.ArbolAbstracto
         }
         public void ValidIf(Nodo nodo, int t)
         {
+            bool elseIf = false;
             List<Token> condicion = new List<Token>();
             foreach(Nodo hijo in nodo.Hijos)
             {
@@ -276,7 +316,19 @@ namespace Proyecto.ArbolAbstracto
                     foreach(Nodo n  in hijo.Hijos)
                     {
                         if(n.Token!= null)
+                        {
                             condicion.Add(n.Token);
+                        }
+                            
+
+                    }
+                }
+                else if (hijo.Token!= null)
+                {
+                    if(hijo.Token.tipoToken == TipoToken.pElse)
+                    {
+                        elseIf = true;
+                        condicion.Clear();
                     }
                 }
             }
@@ -292,7 +344,10 @@ namespace Proyecto.ArbolAbstracto
             string tabs = "";
             for (int i = 0; i < t; i++)
                 tabs += "\t";
-            Console.WriteLine($"{tabs}if({condi}){"{"}");
+            if (elseIf)
+                Console.WriteLine($"{tabs}else if({condi}){"{"}");
+            else
+                Console.WriteLine($"{tabs}if({condi}){"{"}");
 
         }
         public void ValidForeach(Nodo nodo , int t)
@@ -432,6 +487,64 @@ namespace Proyecto.ArbolAbstracto
             }
             Console.WriteLine($"{tabs}console.log({key});");
         }
+        public void ValidFunctionCall(string key, Nodo nodo, int t)
+        {
+            string strParams = "";
+            Nodo nParams = new Nodo(null);
+            foreach (Nodo hijo in nodo.Hijos)
+            {
+                if (hijo.Name == "Parametros")
+                {
+                    nParams = hijo;
+                    foreach (Nodo par in hijo.Hijos)
+                    {
+                        if (par.Token != null)
+                        {
+                            strParams += par.Token.Lexema;
+                        }
+                    }
+                }
+                else if (hijo.Token != null)
+                {
+                    if(hijo.Token.tipoToken == TipoToken.nDate)
+                    {
+                        strParams = hijo.Token.Lexema;
+                    }
+                }
+            }
+            string tabs = "";
+            for (int i = 0; i < t; i++)
+            {
+                tabs += "\t";
+            }
+            Console.WriteLine($"{tabs}{key}({strParams});");
+        }
+        public void ValidAssignation(string key, Nodo nodo, int t)
+        {
+            string asignacion = "";
+            bool despuesIgual = false;
+            foreach(Nodo hijo in nodo.Hijos)
+            {
+                if(hijo.Token!= null)
+                {
+                    if (despuesIgual)
+                    {
+                        asignacion += hijo.Token.Lexema;
+                    }
+                    if (hijo.Token.tipoToken == TipoToken.sIgual)
+                    {
+                        despuesIgual = true;
+                    }
+                }
+            }
+
+            string tabs = "";
+            for (int i = 0; i < t; i++)
+            {
+                tabs += "\t";
+            }
+            Console.WriteLine($"{tabs}{key} = {asignacion}");
+        }
         public void Close(int t)
         { string tab ="";
             for (int i = 0; i<t; i++)
@@ -439,10 +552,6 @@ namespace Proyecto.ArbolAbstracto
                 tab+= "\t";
             }
             Console.WriteLine(tab+"}");
-        }
-        public void ValidFunctionCall(string key, Nodo padre, int tabs)
-        {
-            
         }
     }
 }

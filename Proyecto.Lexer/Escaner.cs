@@ -44,6 +44,7 @@ namespace Proyecto.Lexer
                     new FPalabraToken(),
                     new GPalabraToken(),
                     new IPalabraToken(),
+                    new LPalabraToken(),
                     new MPalabraToken(),
                     new NPalabraToken(),
                     new PPalabraToken(),

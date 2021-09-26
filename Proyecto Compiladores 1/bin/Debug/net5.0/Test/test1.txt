@@ -1,40 +1,27 @@
 ﻿public class Clase
 {
-	public void func()
+	public int prop;
+	public List<int> lista = new List<int>(){1 , 1};
+
+	public void funcion1(int x, int y)
 	{
-		DateTime date = new DateTime( 2021,10,11,12,00,00);
-		bool isTrue = false;
-		
-		if(cont <= 10)
+		while(x!=10)
 		{
-			return 2;
-		}
-		Clase clasep;
-		return 0;
-	}
-	public int func2(int v, int x)
-	{
-		Console.Writeline("funcion2");
-		int cont = 0;
-		while( cont <= 10)
-		{
-			Console.Writeline("while Funcion");
-			cont++;
+			if(x==2)
+			{
+				Console.WriteLine("Prueba");
+				y = Console.Readline();
+			}
+			x++;
 		}
 	}
-	public int prop3 = 123 + 31121;
 }
-public class clase2
+public class Program
 {
-	public int prop3 = 12;
-
-	public void func()
-	{
-		console.writeline("Clase 2 Func 1");
-		foreach(int number in numbers)
+		static void main()
 		{
-			console.writeline("ForEach");	
+			Clase claseDecl;
+			claseDecl.funcion( 1,2 );
+			console.writeline("main");
 		}
-	}
 }
-

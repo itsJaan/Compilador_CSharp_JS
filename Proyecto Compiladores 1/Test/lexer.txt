@@ -1,1 +1,42 @@
-﻿
+﻿public class Clase
+{
+	public void func()
+	{
+		DateTime date = new DateTime( 2021,10,11,12,00,00);
+		bool isTrue = false;
+		
+		if(cont <= 10)
+		{
+			return;
+		}
+		else if (cont >=10)
+		{
+			return;
+		}
+	}
+	public int func2(int v, int x)
+	{
+		Console.Writeline("funcion2");
+		int cont = 0;
+		while( cont <= 10)
+		{
+			Console.Writeline("while Funcion");
+			cont++;
+		}
+	}
+	public int prop3 = 123 + 31121;
+}
+public class clase2
+{
+	public int prop3 = 12;
+
+	public void func()
+	{
+		console.writeline("Clase 2 Func 1");
+		foreach(int number in numbers)
+		{
+			console.writeline("ForEach");	
+		}
+	}
+}
+

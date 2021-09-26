@@ -18,7 +18,6 @@ namespace Proyecto.Lexer.TokenizadorC
                || tok == "h" || tok == "H"
                || tok == "j" || tok == "J"
                || tok == "k" || tok == "K"
-               || tok == "l" || tok == "L"
                || tok == "o" || tok == "O"
                || tok == "q" || tok == "Q"
                || tok == "x" || tok == "X"
