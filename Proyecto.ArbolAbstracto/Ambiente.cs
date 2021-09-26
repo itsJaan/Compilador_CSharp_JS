@@ -12,39 +12,48 @@ namespace Proyecto.ArbolAbstracto
         public Ambiente anterior { get; set;}
         public Dictionary<string, Nodo> tabla;
         public Dictionary<string, Nodo> tablaAsign;
+        public string Name;
 
-        public Ambiente(Ambiente a)
+        public Ambiente(Ambiente a , string n)
         {
             anterior = a;
+            Name = n;
             tabla = new Dictionary<string, Nodo>();
             tablaAsign = new Dictionary<string, Nodo>();
         }
 
-        public bool Add(string l, Nodo n)
+        public bool Add(string l, Nodo n, Ambiente ambiente)
         {
-
-            try
+            var found = GetEnvironment(l, ambiente);
+            if (!found)
             {
-                tabla.Add(l, n);
-                return false;    
+                try
+                {
+                    tabla.Add(l, n);
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"Ya existe {n.Name} {l}");
+                    return true;
+                }
             }
-            catch (Exception e)
+            else
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine($"Ya existe {n.Name} {l}");
                 return true;
             }
         }
-        public Nodo GetEnvironment( string l)
+        public bool GetEnvironment(string l ,Ambiente ambiente )
         {
-            Ambiente ambienteActual = this;
-            while (ambienteActual!= null) {
-                if (tabla.TryGetValue(l, out var found))
-                    return found;
-                else
-                    ambienteActual = anterior;
+            while (ambiente.Name!= "Anterior Raiz") {
+                if (ambiente.tabla.ContainsKey(l))
+                    return true;
+                ambiente = ambiente.anterior;
             }   
-            return null;
+            return false;
         }
         public void ValidImport(string key, Nodo nodo)
         {
@@ -237,7 +246,7 @@ namespace Proyecto.ArbolAbstracto
                     }
                 }
             }
-
+            
             string tabs = "";
             for (int i = 0; i < t; i++)
                 tabs += "\t";
@@ -319,8 +328,6 @@ namespace Proyecto.ArbolAbstracto
                         {
                             condicion.Add(n.Token);
                         }
-                            
-
                     }
                 }
                 else if (hijo.Token!= null)
@@ -330,14 +337,29 @@ namespace Proyecto.ArbolAbstracto
                         elseIf = true;
                         condicion.Clear();
                     }
+                    else if (hijo.Token.tipoToken == TipoToken.sAmpr || hijo.Token.tipoToken == TipoToken.sOr)
+                    {
+                        condicion.Add(hijo.Token);
+                    }
                 }
             }
             //VALIDAR CONDICION
 
             string condi = "";
+            int cont = 0;
             foreach(Token tok in condicion)
             {
-                condi += tok.Lexema+" ";
+                if (tok.tipoToken == TipoToken.sAmpr || tok.tipoToken == TipoToken.sOr)
+                    cont++;
+
+                if (cont == 1)
+                {
+                    condi += tok.Lexema;
+                }
+                else
+                    condi += tok.Lexema+ " ";
+                
+                
             }
 
 
@@ -349,6 +371,15 @@ namespace Proyecto.ArbolAbstracto
             else
                 Console.WriteLine($"{tabs}if({condi}){"{"}");
 
+        }
+        public void ValidElse(Nodo nodo, int t)
+        {
+            string tabs = "";
+            for (int i = 0; i < t; i++)
+                tabs += "\t";
+            
+            Console.WriteLine($"{tabs}else {"{"}");
+        
         }
         public void ValidForeach(Nodo nodo , int t)
         {

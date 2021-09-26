@@ -29,7 +29,8 @@ namespace Proyecto.Parser
             escaner = sc;
             errores = new List<Error>();
             Raiz = new Nodo(null);
-            ambienteRaiz = new Ambiente(null);
+            Ambiente amb = new Ambiente(null, "Anterior Raiz");
+            ambienteRaiz = new Ambiente(amb , "Raiz");
             tabs = 0;
             nMain = new Nodo(Raiz);
         }
@@ -55,7 +56,7 @@ namespace Proyecto.Parser
             if (errores.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine("Succesful");
+                Console.WriteLine("");
                 Console.ForegroundColor = ConsoleColor.White;
             }
             else
@@ -118,7 +119,7 @@ namespace Proyecto.Parser
                 }
             }
 
-            bool exists = ambienteRaiz.Add(key,padre);
+            bool exists = ambienteRaiz.Add(key,padre , ambienteRaiz);
             if(!exists)
                 ambienteRaiz.ValidImport(key ,padre);
 
@@ -155,7 +156,7 @@ namespace Proyecto.Parser
         }
         private Nodo CLASS(Nodo padre)
         {
-            Ambiente ambienteClase = new Ambiente(ambienteRaiz);
+            Ambiente ambienteClase = new Ambiente(ambienteRaiz , "Clase");
             Nodo hijo = new Nodo(padre);
             hijo.Token = tokSig.token;
             padre.Hijos.Add(hijo);
@@ -183,7 +184,7 @@ namespace Proyecto.Parser
                     }
                 }
             }
-            bool exists = ambienteRaiz.Add(key, padre);
+            bool exists = ambienteRaiz.Add(key, padre , ambienteRaiz);
             if (!exists)
                 ambienteRaiz.ValidClassDeclaration(key, padre);
 
@@ -217,7 +218,7 @@ namespace Proyecto.Parser
         private Nodo INCLASS(Nodo padre, Ambiente ambientePadre)
         {
             tabs++;
-            Ambiente ambienteInClass = new Ambiente(ambientePadre);
+            Ambiente ambienteInClass = new Ambiente(ambientePadre , "In Class");
             //SI ES MAIN
             if (this.tokSig.token.tipoToken == TipoToken.pStatic)
             {
@@ -403,7 +404,7 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoLlaveA);
                     match(TipoToken.llaveA);
 
-                    bool exists = ambientePadre.Add(key, padre);
+                    bool exists = ambientePadre.Add(key, padre,ambientePadre);
                     if (!exists)
                         ambientePadre.ValidFunctionDecl(key, padre , tabs);
                     
@@ -457,7 +458,7 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoLlaveC);
                     match(TipoToken.llaveC);
 
-                    bool exists = ambientePadre.Add(key, padre);
+                    bool exists = ambientePadre.Add(key, padre, ambientePadre);
                     if (!exists)
                         ambientePadre.ValidDeclaration(key, padre, tabs);
 
@@ -474,7 +475,7 @@ namespace Proyecto.Parser
 
                     padre = DECLARACION_IGUAL(padre);
 
-                    bool exists = ambientePadre.Add(key, padre);
+                    bool exists = ambientePadre.Add(key, padre, ambientePadre);
                     if (!exists)
                         ambientePadre.ValidDeclaration(key, padre, tabs);
                     tabs--;
@@ -488,7 +489,7 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoPc);
                     match(TipoToken.sPuntoComa);
 
-                    bool exists = ambientePadre.Add(key, padre);
+                    bool exists = ambientePadre.Add(key, padre, ambientePadre);
                     if (!exists)
                         ambientePadre.ValidDeclaration(key, padre, tabs);
                     
@@ -563,7 +564,40 @@ namespace Proyecto.Parser
                     key= hijoComilla.Token.Lexema;
                     match(TipoToken.strEntreComilla);
                 }
+                else if (tokSig.token.tipoToken == TipoToken.numeroEntero)
+                {
+                    Nodo hijoComilla = new Nodo(padre);
+                    hijoComilla.Token = tokSig.token;
+                    padre.Hijos.Add(hijoComilla);
+                    key = hijoComilla.Token.Lexema;
+                    match(TipoToken.numeroEntero);
+                }
+                else if (tokSig.token.tipoToken == TipoToken.identificador)
+                {
+                    Nodo hijoComilla = new Nodo(padre);
+                    hijoComilla.Token = tokSig.token;
+                    padre.Hijos.Add(hijoComilla);
+                    key = hijoComilla.Token.Lexema;
+                    match(TipoToken.identificador);
+                }
+                else if (tokSig.token.tipoToken == TipoToken.numeroFloat)
+                {
+                    Nodo hijoComilla = new Nodo(padre);
+                    hijoComilla.Token = tokSig.token;
+                    padre.Hijos.Add(hijoComilla);
+                    key = hijoComilla.Token.Lexema;
+                    match(TipoToken.numeroFloat);
+                }
+                else if (tokSig.token.tipoToken == TipoToken.operacionAritmetica)
+                {
+                    Nodo hijoComilla = new Nodo(padre);
+                    hijoComilla.Token = tokSig.token;
+                    padre.Hijos.Add(hijoComilla);
+                    key = hijoComilla.Token.Lexema;
+                    match(TipoToken.operacionAritmetica);
+                }
                 
+
                 Nodo hijoParC = new Nodo(padre);
                 hijoParC.Token = tokSig.token;
                 padre.Hijos.Add(hijoParC);
@@ -575,7 +609,7 @@ namespace Proyecto.Parser
                 match(TipoToken.sPuntoComa);
 
 
-                bool exists = ambientePadre.Add(key, padre);
+                bool exists = ambientePadre.Add(key, padre, ambientePadre);
                 if (!exists)
                     ambientePadre.ValidConsole(key, padre, tabs);
 
@@ -587,6 +621,7 @@ namespace Proyecto.Parser
             {
                 padre = IDENTIFICADOR(padre);
                 string key = "";
+                string keyAux = "";
                 bool decl = false;
                 bool asignCompleta = false;
                 bool incDec = false;
@@ -616,6 +651,19 @@ namespace Proyecto.Parser
                 else if(tokSig.token.tipoToken == TipoToken.identificador)
                 {
                     padre = IDENTIFICADOR(padre);
+
+                    foreach (Nodo n in padre.Hijos)
+                    {
+                        if (n.Token != null)
+                        {
+                            if (n.Token.tipoToken == TipoToken.identificador || n.Token.tipoToken == TipoToken.sPunto)
+                            {
+                                if(n.Token.Lexema != key)
+                                keyAux += n.Token.Lexema;
+                            }
+                        }
+                    }
+
                     if (tokSig.token.tipoToken == TipoToken.sPuntoComa)
                     {
                         Nodo hijoPc = new Nodo(padre);
@@ -683,12 +731,12 @@ namespace Proyecto.Parser
                     callF = true;
                 }
 
-                bool exists = ambientePadre.Add(key, padre);
+                bool exists = ambientePadre.Add(key, padre , ambientePadre);
                 if (!exists)
                 {
                     if (decl)
                     {
-                        ambientePadre.ValidDeclaration(key, padre, tabs);
+                        ambientePadre.ValidDeclaration(keyAux, padre, tabs);
                     }
                     else if (incDec)
                     {
@@ -722,7 +770,7 @@ namespace Proyecto.Parser
 
                 key = "break" + tabs;
                
-                bool exists = ambientePadre.Add(key, padre);
+                bool exists = ambientePadre.Add(key, padre, ambientePadre);
                 if (!exists)
                     ambientePadre.ValidBreak(key, padre, tabs);
 
@@ -777,7 +825,7 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoPc);
                 match(TipoToken.sPuntoComa);
 
-                bool exists = ambientePadre.Add(key, padre);
+                bool exists = ambientePadre.Add(key, padre , ambientePadre);
                 if (!exists)
                     ambientePadre.ValidReturn(key, padre, tabs);
 
@@ -907,7 +955,7 @@ namespace Proyecto.Parser
         }
         private Nodo SENTENCIA(Nodo padre, Ambiente ambientePadre)
         {   
-            Ambiente ambienteSentencia = new Ambiente(ambienteRaiz);
+            Ambiente ambienteSentencia = new Ambiente(ambientePadre , "Sentencia");
             if(tokSig.token.tipoToken == TipoToken.pIf)
             {
                 
@@ -1107,6 +1155,8 @@ namespace Proyecto.Parser
                 hijoLlaveAElse.Token = tokSig.token;
                 padre.Hijos.Add(hijoLlaveAElse);
                 match(TipoToken.llaveA);
+
+                ambiente.ValidElse(padre, tabs);
 
                 Nodo hijoInMain2 = new Nodo(padre);
                 hijoInMain2.Name = "In Else";
@@ -1569,12 +1619,20 @@ namespace Proyecto.Parser
 
             if (tokSig.token.tipoToken == TipoToken.sAmpr)
             {
+                Nodo hijoAmpr = new Nodo(padre);
+                hijoAmpr.Token = tokSig.token;
+                padre.Hijos.Add(hijoAmpr);
+                padre.Hijos.Add(hijoAmpr);
                 match(TipoToken.sAmpr);
                 match(TipoToken.sAmpr);
                 padre = CONDICION_IF(padre);
             }
             else if (tokSig.token.tipoToken == TipoToken.sOr)
             {
+                Nodo hijoOr = new Nodo(padre);
+                hijoOr.Token = tokSig.token;
+                padre.Hijos.Add(hijoOr);
+                padre.Hijos.Add(hijoOr);
                 match(TipoToken.sOr);
                 match(TipoToken.sOr);
                 padre = CONDICION_IF(padre);
@@ -1752,7 +1810,7 @@ namespace Proyecto.Parser
                 padre = DECLARACION_IGUAL(padre);
             }
 
-            bool exists = ambientePadre.Add(key, padre);
+            bool exists = ambientePadre.Add(key, padre, ambientePadre);
             if (!exists)
                 ambientePadre.ValidDeclaration(key, padre, tabs);
 

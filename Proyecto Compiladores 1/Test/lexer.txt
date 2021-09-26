@@ -40,3 +40,34 @@ public class clase2
 	}
 }
 
+public class Clase
+{
+	public int prop;
+	public List<int> lista = new List<int>(){1,1};
+
+	public void funcion1(int x, int y)
+	{
+		while(x!=10)
+		{
+			if(x==2 || x>=y)
+			{
+				Console.WriteLine("Prueba");
+				y = Console.Readline();
+			}
+			else
+			{
+				Console.WriteLine("Prueba");
+			}
+			x++;
+		}
+	}
+}
+public class Program
+{		
+		static void main()
+		{
+			Clase claseDecl;
+			claseDecl.funcion( 1,2 );
+			console.writeline("main");
+		}
+}

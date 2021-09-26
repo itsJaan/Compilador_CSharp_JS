@@ -1,27 +1,16 @@
-﻿public class Clase
-{
-	public int prop;
-	public List<int> lista = new List<int>(){1 , 1};
+﻿using System;
+Using System.IO;
 
-	public void funcion1(int x, int y)
+public class Clase
+{
+	public float prop1;
+	public int prop2;
+	
+	public void funcion(int x)
 	{
-		while(x!=10)
+		if(x != prop2)
 		{
-			if(x==2)
-			{
-				Console.WriteLine("Prueba");
-				y = Console.Readline();
-			}
-			x++;
+			int Clase = 0;
 		}
 	}
-}
-public class Program
-{
-		static void main()
-		{
-			Clase claseDecl;
-			claseDecl.funcion( 1,2 );
-			console.writeline("main");
-		}
 }

@@ -13,7 +13,7 @@ namespace Proyecto.Lexer.TokenizadorC
         public ResultadoTokenizador verificarToken(Entrada e, string tok)
         {
             string numeros = "1234567890";
-            string operador = "+-/*., ";
+            string operador = "+-/*.,";
             bool date = false;
             string tokCompleto = "";
             if (numeros.Contains(tok)) 
