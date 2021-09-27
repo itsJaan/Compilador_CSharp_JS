@@ -10,7 +10,7 @@ public class Clase
 	{
 		if(x != prop2)
 		{
-			int Clase = 0;
+			console.writeline("HolaMundo");
 		}
 	}
 }

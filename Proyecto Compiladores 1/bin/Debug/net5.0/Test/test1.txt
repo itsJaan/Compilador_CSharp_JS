@@ -4,13 +4,13 @@ Using System.IO;
 public class Clase
 {
 	public float prop1;
-	public int prop2;
+	public int ;
 	
 	public void funcion(int x)
 	{
 		if(x != prop2)
 		{
-			int Clase = 0;
+			console.writeline("HolaMundo");
 		}
 	}
 }

@@ -393,6 +393,15 @@ namespace Proyecto.Parser
                         hijoParametros.Name = "Parametros";
                         hijoParametros = PARAMETROS(hijoParametros);
                         padre.Hijos.Add(hijoParametros);
+
+                        //Verificacion y asignacion parametros
+                        foreach(Nodo hijo in hijoParametros.Hijos)
+                        {
+                            if (hijo.Token != null)
+                            {
+                                ambienteInClass.Add(hijo.Token.Lexema, hijo, ambienteInClass);
+                            }
+                        }
                     }
                     Nodo hijoParC = new Nodo(padre);
                     hijoParC.Token = tokSig.token;
@@ -515,6 +524,7 @@ namespace Proyecto.Parser
         {
             tabs++;
             
+            
             if (tipoDato.Contains(tokSig.token.tipoToken))
             {
                 Nodo hijoDecl = new Nodo(padre);
@@ -535,6 +545,8 @@ namespace Proyecto.Parser
             }
             else if (tokSig.token.tipoToken == TipoToken.pConsole)
             {
+                bool existeVar = false;
+                bool esId = false;
                 Nodo hijoConsole = new Nodo(padre);
                 hijoConsole.Token = tokSig.token;
                 padre.Hijos.Add(hijoConsole);
@@ -579,6 +591,11 @@ namespace Proyecto.Parser
                     padre.Hijos.Add(hijoComilla);
                     key = hijoComilla.Token.Lexema;
                     match(TipoToken.identificador);
+
+                    esId = true;
+                    existeVar = ambientePadre.GetEnvironment(key, ambientePadre);
+
+
                 }
                 else if (tokSig.token.tipoToken == TipoToken.numeroFloat)
                 {
@@ -609,9 +626,21 @@ namespace Proyecto.Parser
                 match(TipoToken.sPuntoComa);
 
 
-                bool exists = ambientePadre.Add(key, padre, ambientePadre);
-                if (!exists)
+                if (esId)
+                {
+                    if (existeVar)
+                    {
+                        ambientePadre.ValidConsole(key, padre, tabs);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine($"No existe variable {key}");
+                    }
+                }
+                else
                     ambientePadre.ValidConsole(key, padre, tabs);
+                
 
                 tabs--;
                 return padre;
@@ -626,6 +655,7 @@ namespace Proyecto.Parser
                 bool asignCompleta = false;
                 bool incDec = false;
                 bool callF = false;
+                bool existClase = false;
                 foreach (Nodo n in padre.Hijos)
                 {
                     if (n.Token != null)
@@ -636,6 +666,8 @@ namespace Proyecto.Parser
                         }
                     }
                 }
+
+                existClase = ambientePadre.GetEnvironment(key, ambientePadre);
 
                 if (tokSig.token.tipoToken == TipoToken.sIgual)
                 {
@@ -731,12 +763,19 @@ namespace Proyecto.Parser
                     callF = true;
                 }
 
-                bool exists = ambientePadre.Add(key, padre , ambientePadre);
-                if (!exists)
+                
+                if (existClase)
                 {
                     if (decl)
                     {
-                        ambientePadre.ValidDeclaration(keyAux, padre, tabs);
+                        bool exists = ambientePadre.Add(keyAux, padre, ambientePadre);
+                        if(!exists)
+                            ambientePadre.ValidDeclaration(keyAux, padre, tabs);
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            Console.WriteLine($"Variable {key} ya existe.");
+                        }
                     }
                     else if (incDec)
                     {
@@ -750,6 +789,11 @@ namespace Proyecto.Parser
                     {
                         ambientePadre.ValidAssignation(key, padre, tabs);
                     }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"No existe variable o clase {key}");
                 }
                 tabs--;
                 return padre;
@@ -779,7 +823,9 @@ namespace Proyecto.Parser
             }
             else if (tokSig.token.tipoToken == TipoToken.pReturn)
             {
-                string key = "r";
+                string key = "";
+                bool esId = false;
+                bool exists = false;
                 Nodo hijoReturn = new Nodo(padre);
                 hijoReturn.Token = tokSig.token;
                 padre.Hijos.Add(hijoReturn);
@@ -799,6 +845,8 @@ namespace Proyecto.Parser
                             }
                         }
                     }
+                    esId = true;
+                    exists = ambientePadre.GetEnvironment(key, ambientePadre);
 
                 }
                 else if (tokSig.token.tipoToken == TipoToken.numeroEntero)
@@ -825,14 +873,28 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoPc);
                 match(TipoToken.sPuntoComa);
 
-                bool exists = ambientePadre.Add(key, padre , ambientePadre);
-                if (!exists)
-                    ambientePadre.ValidReturn(key, padre, tabs);
+                if (esId)
+                {
+                    if (exists)
+                    {
+                        ambientePadre.ValidReturn(key, padre, tabs);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine($"Variable {key} no existe.");
+                    }
 
+                }
+                else
+                {
+                    ambientePadre.ValidReturn(key, padre, tabs);
+                }
+                    
                 tabs--;
                 return padre;
             }
-            return null;
+            return padre;
         }
         private Nodo FUNCIONCALL(Nodo padre)
         {
@@ -973,7 +1035,7 @@ namespace Proyecto.Parser
                 hijoCondicion.Name = "Condicion IF";
                 hijoCondicion = CONDICION_IF(hijoCondicion);
                 padre.Hijos.Add(hijoCondicion);
-
+                
                 Nodo hijoParC = new Nodo(padre);
                 hijoParC.Token = tokSig.token;
                 padre.Hijos.Add(hijoParC);
@@ -984,7 +1046,47 @@ namespace Proyecto.Parser
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
 
+                Token auxId = new Token();
+                Token auxId2 = new Token();
+                bool incId = false;
+                int cont = 0;
+                foreach (Nodo hijo in hijoCondicion.Hijos)
+                {
+                    if (hijo.Token!= null)
+                    {
+                        if (hijo.Token.tipoToken == TipoToken.identificador)
+                        {
+                            if (cont == 0)
+                                auxId = hijo.Token;
+                            else
+                                auxId2 = hijo.Token;
+                            incId = true;
+                            cont++;
+                        }
+                    }
+                }
+                bool existeVar1 = false;
+                bool existeVar2 = false;
+                if (incId)
+                {
+                    existeVar1 = ambientePadre.GetEnvironment(auxId.Lexema , ambientePadre);
+                    if (cont > 1)
+                    {
+                        existeVar2 = ambientePadre.GetEnvironment(auxId2.Lexema, ambientePadre);
+                    }   
+                } 
                 ambientePadre.ValidIf(padre, tabs);
+                if (!existeVar1)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"Variable {auxId.Lexema} no existe.");
+                }
+                if(cont>1 && !existeVar2)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"Variable {auxId2.Lexema} no existe.");
+                }
+               
 
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "In IF";
@@ -1072,8 +1174,46 @@ namespace Proyecto.Parser
                 hijoLlaveA.Token = tokSig.token;
                 padre.Hijos.Add(hijoLlaveA);
                 match(TipoToken.llaveA);
-
+                Token auxId = new Token();
+                Token auxId2 = new Token();
+                bool incId = false;
+                int cont = 0;
+                foreach (Nodo hijo in hijoCondicion.Hijos)
+                {
+                    if (hijo.Token != null)
+                    {
+                        if (hijo.Token.tipoToken == TipoToken.identificador)
+                        {
+                            if (cont == 0)
+                                auxId = hijo.Token;
+                            else
+                                auxId2 = hijo.Token;
+                            incId = true;
+                            cont++;
+                        }
+                    }
+                }
+                bool existeVar1 = false;
+                bool existeVar2 = false;
+                if (incId)
+                {
+                    existeVar1 = ambientePadre.GetEnvironment(auxId.Lexema, ambientePadre);
+                    if (cont > 1)
+                    {
+                        existeVar2 = ambientePadre.GetEnvironment(auxId2.Lexema, ambientePadre);
+                    }
+                }
                 ambienteSentencia.ValidWhile(padre, tabs);
+                if (!existeVar1)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"Variable {auxId.Lexema} no existe.");
+                }
+                if (cont > 1 && !existeVar2)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"Variable {auxId2.Lexema} no existe.");
+                }
 
                 Nodo hijoInMain = new Nodo(padre);
                 hijoInMain.Name = "In While";
